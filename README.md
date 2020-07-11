@@ -15,7 +15,8 @@
 4. 以每个角色的头像对照参考图片（refImage，来自于[公主连结Re: Dive Fan Club](https://www.pcrdfans.com/battle)）进行matchTemplate后，获得识别结果的坐标的中点
 5. 根据中点和config中的refImage相关数据，判断其行列坐标并输出
 
-## 示例（外链nga图片）
+## 示例（转到nga）
+https://nga.178.com/read.php?tid=22524716&_ff=-10308342
 
 ### 开发计划
 1. 基于PyQt5的图形界面

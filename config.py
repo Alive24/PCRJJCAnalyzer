@@ -3,6 +3,8 @@ refImg = {
     'Height': 680,
     'RowCount': 11,
     'ColumnCount': 11,
+    'UnitWidth': 60,
+    'GapWidth': 2
 }
 
 simulator = {
@@ -19,3 +21,4 @@ charLocationRatioConfig = {
 apiKey = ""
 
 region = 1
+algorithm = "TM_SQDIFF"

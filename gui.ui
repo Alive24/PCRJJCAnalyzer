@@ -7,13 +7,16 @@
     <x>0</x>
     <y>0</y>
     <width>825</width>
-    <height>591</height>
+    <height>648</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <widget class="QRadioButton" name="radioButton">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>110</x>
@@ -25,8 +28,14 @@
    <property name="text">
     <string>竞技场</string>
    </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QRadioButton" name="radioButton_2">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>180</x>
@@ -40,6 +49,9 @@
    </property>
   </widget>
   <widget class="QRadioButton" name="radioButton_3">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>270</x>
@@ -53,9 +65,12 @@
    </property>
   </widget>
   <widget class="QLabel" name="label">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>20</x>
      <y>10</y>
      <width>81</width>
      <height>16</height>
@@ -66,9 +81,12 @@
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>20</x>
      <y>40</y>
      <width>81</width>
      <height>16</height>
@@ -79,6 +97,9 @@
    </property>
   </widget>
   <widget class="QRadioButton" name="radioButton_4">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>250</x>
@@ -92,6 +113,9 @@
    </property>
   </widget>
   <widget class="QRadioButton" name="radioButton_5">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>180</x>
@@ -105,6 +129,9 @@
    </property>
   </widget>
   <widget class="QRadioButton" name="radioButton_6">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>110</x>
@@ -118,6 +145,9 @@
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>440</x>
@@ -130,7 +160,7 @@
     <string>自有角色限制</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
+  <widget class="QLabel" name="regionSelector">
    <property name="geometry">
     <rect>
      <x>440</x>
@@ -143,7 +173,7 @@
     <string>服务器选择</string>
    </property>
   </widget>
-  <widget class="QRadioButton" name="radioButton_7">
+  <widget class="QRadioButton" name="setRegion3">
    <property name="geometry">
     <rect>
      <x>680</x>
@@ -155,8 +185,11 @@
    <property name="text">
     <string>日服</string>
    </property>
+   <attribute name="buttonGroup">
+    <string notr="true">regionButtonGroup</string>
+   </attribute>
   </widget>
-  <widget class="QRadioButton" name="radioButton_8">
+  <widget class="QRadioButton" name="setRegion2">
    <property name="geometry">
     <rect>
      <x>610</x>
@@ -168,8 +201,11 @@
    <property name="text">
     <string>繁中服</string>
    </property>
+   <attribute name="buttonGroup">
+    <string notr="true">regionButtonGroup</string>
+   </attribute>
   </widget>
-  <widget class="QRadioButton" name="radioButton_9">
+  <widget class="QRadioButton" name="setRegion1">
    <property name="geometry">
     <rect>
      <x>540</x>
@@ -181,6 +217,9 @@
    <property name="text">
     <string>简中服</string>
    </property>
+   <attribute name="buttonGroup">
+    <string notr="true">regionButtonGroup</string>
+   </attribute>
   </widget>
   <widget class="QGraphicsView" name="char1Avatar">
    <property name="geometry">
@@ -252,7 +291,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>角色1 Lv1</string>
+    <string>角色1</string>
    </property>
   </widget>
   <widget class="QLabel" name="char2Label">
@@ -265,7 +304,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>角色2 Lv1</string>
+    <string>角色2</string>
    </property>
   </widget>
   <widget class="QGraphicsView" name="char2Star">
@@ -298,7 +337,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>角色3 Lv1</string>
+    <string>角色3</string>
    </property>
   </widget>
   <widget class="QGraphicsView" name="char4Star">
@@ -321,7 +360,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>角色4 Lv1</string>
+    <string>角色4</string>
    </property>
   </widget>
   <widget class="QGraphicsView" name="char5Star">
@@ -344,56 +383,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>角色5 Lv1</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="Debugger">
-   <property name="geometry">
-    <rect>
-     <x>610</x>
-     <y>30</y>
-     <width>91</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Debugger</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="handleNumber">
-   <property name="geometry">
-    <rect>
-     <x>710</x>
-     <y>40</y>
-     <width>81</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="parse">
-   <property name="geometry">
-    <rect>
-     <x>620</x>
-     <y>550</y>
-     <width>91</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Parse</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="query">
-   <property name="geometry">
-    <rect>
-     <x>430</x>
-     <y>550</y>
-     <width>91</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>query</string>
+    <string>角色5</string>
    </property>
   </widget>
   <widget class="QScrollArea" name="solutionListScrollArea">
@@ -402,7 +392,7 @@
      <x>230</x>
      <y>90</y>
      <width>581</width>
-     <height>451</height>
+     <height>491</height>
     </rect>
    </property>
    <property name="verticalScrollBarPolicy">
@@ -423,7 +413,7 @@
       <x>0</x>
       <y>0</y>
       <width>579</width>
-      <height>449</height>
+      <height>489</height>
      </rect>
     </property>
     <widget class="QWidget" name="verticalLayoutWidget">
@@ -432,31 +422,186 @@
        <x>10</x>
        <y>10</y>
        <width>561</width>
-       <height>181</height>
+       <height>471</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="solutionListLayout">
       <property name="spacing">
-       <number>40</number>
+       <number>10</number>
+      </property>
+      <property name="sizeConstraint">
+       <enum>QLayout::SetDefaultConstraint</enum>
       </property>
      </layout>
     </widget>
    </widget>
   </widget>
-  <widget class="QPushButton" name="tryAddSolution">
+  <widget class="QPushButton" name="recognizeAndSolveButton">
    <property name="geometry">
     <rect>
-     <x>240</x>
-     <y>552</y>
+     <x>20</x>
+     <y>60</y>
      <width>91</width>
-     <height>31</height>
+     <height>23</height>
     </rect>
    </property>
    <property name="text">
-    <string>addSolution</string>
+    <string>识别求解</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="manualSetChar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>60</y>
+     <width>91</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>手动设定阵容</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="TM_CCOEFF_NORMED">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>600</y>
+     <width>121</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>TM_CCOEFF_NORMED</string>
+   </property>
+   <attribute name="buttonGroup">
+    <string notr="true">buttonGroup</string>
+   </attribute>
+  </widget>
+  <widget class="QLabel" name="TMAlgorithm">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>600</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>图像识别算法</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="TM_CCOEFF">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>600</y>
+     <width>89</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>TM_CCOEFF</string>
+   </property>
+   <attribute name="buttonGroup">
+    <string notr="true">buttonGroup</string>
+   </attribute>
+  </widget>
+  <widget class="QRadioButton" name="TM_CCORR">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>600</y>
+     <width>71</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>TM_CCORR</string>
+   </property>
+   <attribute name="buttonGroup">
+    <string notr="true">buttonGroup</string>
+   </attribute>
+  </widget>
+  <widget class="QRadioButton" name="TM_CCORR_NORMED">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>600</y>
+     <width>121</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>TM_CCORR_NORMED</string>
+   </property>
+   <attribute name="buttonGroup">
+    <string notr="true">buttonGroup</string>
+   </attribute>
+  </widget>
+  <widget class="QRadioButton" name="TM_SQDIFF">
+   <property name="geometry">
+    <rect>
+     <x>490</x>
+     <y>600</y>
+     <width>121</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>TM_SQDIFF</string>
+   </property>
+   <attribute name="buttonGroup">
+    <string notr="true">buttonGroup</string>
+   </attribute>
+  </widget>
+  <widget class="QRadioButton" name="TM_SQDIFF_NORMED">
+   <property name="geometry">
+    <rect>
+     <x>570</x>
+     <y>600</y>
+     <width>121</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>TM_SQDIFF_NORMED</string>
+   </property>
+   <attribute name="buttonGroup">
+    <string notr="true">buttonGroup</string>
+   </attribute>
+  </widget>
+  <widget class="QComboBox" name="handleSelectorComboBox">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>620</y>
+     <width>201</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="HandleSelector">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>620</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>游戏句柄</string>
    </property>
   </widget>
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="regionButtonGroup"/>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
 </ui>

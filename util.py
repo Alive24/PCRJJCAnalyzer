@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import *
 import win32gui
 import sys
+import data
 hwnd_title = dict()
 
 def cv_getMidPoint(incomingImage, refImage, method):
@@ -59,27 +60,6 @@ def cv_getIndex(midPoint):
     return index
 
 
-def gui_get_all_hwnd(hwnd,mouse):
-    # 用于获取所有窗口的句柄
-    if win32gui.IsWindow(hwnd) and win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindowVisible(hwnd):
-        hwnd_title.update({hwnd:win32gui.GetWindowText(hwnd)})
-
-def gui_promtHandle():
-    # 打印出所有窗口句柄和标题
-    win32gui.EnumWindows(gui_get_all_hwnd, 0)
-    for h,t in hwnd_title.items():
-        if t is not "":
-            print(h, t)
-
-def gui_getScreenshotByHandle(handle:int):
-    # 使用QT获取截图
-    app = QApplication(sys.argv)
-    screen = app.primaryScreen()
-    img = screen.grabWindow(handle).toImage()
-    return img
-
-
-
 def query_gen_quick_key(true_id:str, user_id:int) -> str:
     qkey = int(true_id[-6:], 16)
     while qkey in quick_key_dic and quick_key_dic[qkey] != true_id:
@@ -89,12 +69,21 @@ def query_gen_quick_key(true_id:str, user_id:int) -> str:
     qkey ^= mask
     return base64.b32encode(qkey.to_bytes(3, 'little')).decode()[:5]
 
-def query_parse_result(result):
-    plan = {
-        'id': result['id'],
-        'planCharList' : [],
-        'planPickList': [],
-        'updated': '',
-        'up': 0,
-        'down': 0,
-    }
+def query_getPickAvatar(id:int) -> QImage:
+    def getGridIndex(realId):
+        index = [0, 0]
+        for i in range(config.refImg['RowCount']):
+            for j in range(config.refImg['ColumnCount']):
+                if data.refGrid[i][j]['id'] == realId:
+                    index[0] = i + 1
+                    index[1] = j + 1
+                    return index
+    realId = id // 100
+    pickIndex = getGridIndex(realId)
+    pickX = (pickIndex[1] - 1) * (config.refImg['UnitWidth'] + config.refImg['GapWidth'])
+    pickY = (pickIndex[0] - 1) * (config.refImg['UnitWidth'] + config.refImg['GapWidth'])
+    pickW = config.refImg['UnitWidth']
+    pickH = config.refImg['UnitWidth']
+    pickAvatar = QImage('refImage.png').copy(pickX, pickY, pickW, pickH)
+    return pickAvatar
+

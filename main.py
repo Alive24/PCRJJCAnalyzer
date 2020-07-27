@@ -6,144 +6,276 @@ import data
 import cv2
 import sys
 import httpx
+import requests
+import win32gui
 import asyncio
-from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QLabel, QWidget
+import quamash
+from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QLabel, QWidget, QTextBrowser, QMessageBox
 from PyQt5 import QtGui, QtCore, QtNetwork
+from PyQt5.QtCore import QRunnable, QThreadPool, pyqtSlot, QThread, QMetaObject, Qt, Q_ARG
 from gui import Ui_PCRJJCAnalyzerGUI
 from solutionWidget import Ui_solutionWidget
-global handle
-global charImageList
-global charDataList
+
 global apiKey
 
+
+
+
+
+class RequestRunnable(QRunnable):
+    def __init__(self, url, json, mainGUI):
+        QRunnable.__init__(self)
+        self.mUrl = url
+        self.mJson = json
+        self.w = mainGUI
+
+    def run(self):
+        headers = {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
+            'authorization': config.apiKey,
+            'Content-Type': 'application/json'
+        }
+        r = requests.post(self.mUrl, json=self.mJson, headers=headers)
+        QThread.msleep(1000)
+        try:
+            for solution in r.json()['data']['result']:
+                QMetaObject.invokeMethod(self.w, "addSolution",
+                                        Qt.QueuedConnection,
+                                        Q_ARG(dict, solution))
+        except Exception as e:
+            print(e)
+
 class GUIsolutionWidget(QWidget, Ui_solutionWidget):
-    def __init__(self, parent=None, solution):
+    def __init__(self, parent=None, solution=None):
         super(GUIsolutionWidget, self).__init__(parent)
         self.setupUi(self)
+        self.pick1Avatar.setObjectName('pick1Avatar_%s' % solution['id'])
+        self.pick2Avatar.setObjectName('pick2Avatar_%s' % solution['id'])
+        self.pick3Avatar.setObjectName('pick3Avatar_%s' % solution['id'])
+        self.pick4Avatar.setObjectName('pick4Avatar_%s' % solution['id'])
+        self.pick5Avatar.setObjectName('pick5Avatar_%s' % solution['id'])
+        self.pick1Star.setObjectName('pick1Star_%s' % solution['id'])
+        self.pick2Star.setObjectName('pick2Star_%s' % solution['id'])
+        self.pick3Star.setObjectName('pick3Star_%s' % solution['id'])
+        self.pick4Star.setObjectName('pick4Star_%s' % solution['id'])
+        self.pick5Star.setObjectName('pick5Star_%s' % solution['id'])
+        self.upCount.setObjectName('upCount_%s' % solution['id'])
+        self.downCount.setObjectName('downCount_%s' % solution['id'])
+        self.commentBrowser.setObjectName('commentBrowser_%s' % solution['id'])
+        self.renderSolution(solution)
+
+    def renderSolution(self, solution):
+        __pickImageList = []
+        __pixPickImageList = []
+        __itemPickImageList = []
+        __scenePickImageList = [QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene()]
+        __scenePickStarList = [QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene()]
+        for i in range(5):
+            if solution["atk"][i]['star'] == 1:
+                __scenePickStarList[i].addText("一星")
+            if solution["atk"][i]['star'] == 2:
+                __scenePickStarList[i].addText("二星")
+            if solution["atk"][i]['star'] == 3:
+                __scenePickStarList[i].addText("三星")
+            if solution["atk"][i]['star'] == 4:
+                __scenePickStarList[i].addText("四星")
+            if solution["atk"][i]['star'] == 5:
+                __scenePickStarList[i].addText("五星")
+            if solution["atk"][i]['star'] == 6:
+                __scenePickStarList[i].addText("六星")
+        for pick in solution["atk"]:
+            __pickImageList.append(util.query_getPickAvatar(pick['id']))
+        __pixPickImageList = [QtGui.QPixmap.fromImage(pickImage) for pickImage in __pickImageList]
+        __itemPickImageList = [QGraphicsPixmapItem(pix) for pix in __pixPickImageList]
+        for i in range(len(__scenePickImageList)):
+            __scenePickImageList[i].addItem(__itemPickImageList[i])
+        try:
+            self.findChild(QGraphicsView, 'pick1Avatar_%s' % solution['id']).setScene(__scenePickImageList[0])
+            self.findChild(QGraphicsView, 'pick2Avatar_%s' % solution['id']).setScene(__scenePickImageList[1])
+            self.findChild(QGraphicsView, 'pick3Avatar_%s' % solution['id']).setScene(__scenePickImageList[2])
+            self.findChild(QGraphicsView, 'pick4Avatar_%s' % solution['id']).setScene(__scenePickImageList[3])
+            self.findChild(QGraphicsView, 'pick5Avatar_%s' % solution['id']).setScene(__scenePickImageList[4])
+            self.findChild(QGraphicsView, 'pick1Star_%s' % solution['id']).setScene(__scenePickStarList[0])
+            self.findChild(QGraphicsView, 'pick2Star_%s' % solution['id']).setScene(__scenePickStarList[1])
+            self.findChild(QGraphicsView, 'pick3Star_%s' % solution['id']).setScene(__scenePickStarList[2])
+            self.findChild(QGraphicsView, 'pick4Star_%s' % solution['id']).setScene(__scenePickStarList[3])
+            self.findChild(QGraphicsView, 'pick5Star_%s' % solution['id']).setScene(__scenePickStarList[4])
+            self.findChild(QLabel, 'upCount_%s' % solution['id']).setText(str(solution['up']))
+            self.findChild(QLabel, 'upCount_%s' % solution['id']).setStyleSheet("color:green")
+            self.findChild(QLabel, 'downCount_%s' % solution['id']).setText(str(solution['down']))
+            self.findChild(QLabel, 'downCount_%s' % solution['id']).setStyleSheet("color:red")
+            for comment in list(reversed(solution['comment'])):
+                self.findChild(QTextBrowser, 'commentBrowser_%s' % solution['id']).append("(%s) %s" % (comment['date'][:10], comment['msg'])) 
+        except Exception as e:
+            print(e, solution)
+        
+
+
         
 
 class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
     def __init__(self, parent=None):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
-        self.Debugger.clicked.connect(self.showChars)
-        self.parse.clicked.connect(self.parseChars)
-        self.query.clicked.connect(self.do_query)
-        self.tryAddSolution.clicked.connect(self.addSolution)
-    def addSolution(self, solution):
-        self.solutionListLayout.addWidget(GUIsolutionWidget(solution))
-        self.solutionListScrollAreaScrollAreaWidgetContents.setLayout(self.solutionListLayout)
-    def showChars(self):
-        self.pixCharImageList = [QtGui.QPixmap.fromImage(charImage) for charImage in charImageList]
+        self.recognizeAndSolveButton.clicked.connect(self.recognizeAndSolve)
+        self.setRegion1.clicked.connect(self.setRegionOnClicked)
+        self.setRegion2.clicked.connect(self.setRegionOnClicked)
+        self.setRegion3.clicked.connect(self.setRegionOnClicked)
+        self.TM_CCOEFF.clicked.connect(self.setTMAlgorithmOnClicked)
+        self.TM_CCOEFF_NORMED.clicked.connect(self.setTMAlgorithmOnClicked)
+        self.TM_CCORR.clicked.connect(self.setTMAlgorithmOnClicked)
+        self.TM_CCORR_NORMED.clicked.connect(self.setTMAlgorithmOnClicked)
+        self.TM_SQDIFF.clicked.connect(self.setTMAlgorithmOnClicked)
+        self.TM_SQDIFF_NORMED.clicked.connect(self.setTMAlgorithmOnClicked)
+        self.region = config.region
+        self.algorithm = config.algorithm
+        if self.region == 1:
+            self.setRegion1.setChecked(True)
+        if self.region == 2:
+            self.setRegion2.setChecked(True)
+        if self.region == 3:
+            self.setRegion3.setChecked(True)
+        if self.algorithm == "TM_CCOEFF":
+            self.TM_CCOEFF.setChecked(True)
+        if self.algorithm == "TM_CCOEFF_NORMED":
+            self.TM_CCOEFF_NORMED.setChecked(True)
+        if self.algorithm == "TM_CCORR":
+            self.TM_CCORR.setChecked(True)
+        if self.algorithm == "TM_CCORR_NORMED":
+            self.TM_CCORR_NORMED.setChecked(True)
+        if self.algorithm == "TM_SQDIFF":
+            self.TM_SQDIFF.setChecked(True)
+        if self.algorithm == "TM_SQDIFF_NORMED":
+            self.TM_SQDIFF_NORMED.setChecked(True)
+        hwnd_title = dict()
+        def gui_get_all_hwnd(hwnd,mouse):
+            if win32gui.IsWindow(hwnd) and win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindowVisible(hwnd):
+                hwnd_title.update({hwnd:win32gui.GetWindowText(hwnd)})
+        win32gui.EnumWindows(gui_get_all_hwnd, 0)
+        self.handleList = []
+        for h,t in hwnd_title.items():
+            if t is not "":
+                self.handleList.append([h, t])
+        self.titleList = [handle[1] for handle in self.handleList]
+        self.handleSelectorComboBox.addItems(self.titleList)
+        self.handleSelectorComboBox.activated[str].connect(self.onHandleSelect)
+        self.handle = 0
+    def onHandleSelect(self, handleTitle):
+        def getHandle(handleTitle):
+            for handle in self.handleList:
+                if handle[1] == handleTitle:
+                    return handle
+        targetHandle = getHandle(handleTitle)
+        self.handle = targetHandle[0]
+    def setTMAlgorithmOnClicked(self):
+        clickedRadioButton = self.sender()
+        if clickedRadioButton.isChecked():
+            if clickedRadioButton.objectName() == "TM_CCOEFF":
+                self.algorithm = "cv2.TM_CCOEFF"
+            if clickedRadioButton.objectName() == "TM_CCOEFF_NORMED":
+                self.algorithm = "cv2.TM_CCOEFF_NORMED"
+            if clickedRadioButton.objectName() == "TM_CCORR":
+                self.algorithm = "cv2.TM_CCORR"
+            if clickedRadioButton.objectName() == "TM_CCORR_NORMED":
+                self.algorithm = "cv2.TM_CCORR_NORMED"
+            if clickedRadioButton.objectName() == "TM_SQDIFF":
+                self.algorithm = "cv2.TM_SQDIFF"
+            if clickedRadioButton.objectName() == "TM_SQDIFF_NORMED":
+                self.algorithm = "cv2.TM_SQDIFF_NORMED"
+
+    def setRegionOnClicked(self):
+        clickedRadioButton = self.sender()
+        if clickedRadioButton.isChecked():
+            if clickedRadioButton.objectName() == "setRegion1":
+                self.region = 1
+            if clickedRadioButton.objectName() == "setRegion2":
+                self.region = 2
+            if clickedRadioButton.objectName() == "setRegion3":
+                self.region = 3
+    def recognizeAndSolve(self):
+        if self.handle == 0:
+            QMessageBox.information(self, "No Handle", "No Handle")
+            return
+        self.sceneCharImageList = [QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene()]
+        for scene in self.sceneCharImageList:
+            scene.clear()
+        for i in range(self.solutionListLayout.count()):
+            self.solutionListLayout.itemAt(i).widget().deleteLater()
+        screenshot = screen.grabWindow(self.handle).toImage()
+        copyX = config.simulator['marginOffset'][0]
+        copyY = config.simulator['marginOffset'][1]
+        copyWidth = screenshot.width() - config.simulator['marginOffset'][0] - config.simulator['marginOffset'][2]
+        copyHeight = screenshot.height() - config.simulator['marginOffset'][1] - config.simulator['marginOffset'][3]
+        gameImage = screenshot.copy(copyX, copyY, copyWidth, copyHeight) # 根据边框裁剪出游戏图像
+        translatedCharY = gameImage.height()*config.charLocationRatioConfig['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+        translatedCharH = gameImage.height()*config.charLocationRatioConfig['h']
+        translatedCharW = gameImage.width()*config.charLocationRatioConfig['w']
+        self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH) for x in config.charLocationRatioConfig['x'] ] # 裁剪出对方每个角色头像
+        self.charDataList = [
+            {'name': '未知角色', 'id': 1000},
+            {'name': '未知角色', 'id': 1000},
+            {'name': '未知角色', 'id': 1000},
+            {'name': '未知角色', 'id': 1000},
+            {'name': '未知角色', 'id': 1000},
+        ]
+        self.pixCharImageList = [QtGui.QPixmap.fromImage(charImage) for charImage in self.charImageList]
+        # for i in range(len(self.pixCharImageList)):
+        #     self.pixCharImageList[i].save('%s.png' % i)
         self.itemCharImageList = [QGraphicsPixmapItem(pix) for pix in self.pixCharImageList]
         # self.sceneCharImageList = [QGraphicsScene().addItem(item) for item in self.itemCharImageList]
-        self.sceneCharImageList = [QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene()]
+        self.showChars()
+        self.parseChars()
+        raw_id_list = [charData['id'] for charData in self.charDataList]
+        id_list = [ x * 100 + 1 for x in raw_id_list ]
+        payload = {
+            "_sign": "a", 
+            "def": id_list, 
+            "nonce": "a", 
+            "page": 1, 
+            "sort": 1, 
+            "ts": int(time.time()), 
+            "region": self.region
+        }        
+        runnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self)
+        QThreadPool.globalInstance().start(runnable)        
+    @pyqtSlot(dict)
+    def addSolution(self, solution):
+        self.solutionListLayout.addWidget(GUIsolutionWidget(solution=solution))
+        self.solutionListScrollAreaScrollAreaWidgetContents.setLayout(self.solutionListLayout)
+    def showChars(self):
         for i in range(len(self.sceneCharImageList)):
             self.sceneCharImageList[i].addItem(self.itemCharImageList[i])
         self.char1Avatar.setScene(self.sceneCharImageList[0])
         self.char2Avatar.setScene(self.sceneCharImageList[1])
         self.char3Avatar.setScene(self.sceneCharImageList[2])
         self.char4Avatar.setScene(self.sceneCharImageList[3])
-        self.char5Avatar.setScene(self.sceneCharImageList[4])
+        self.char5Avatar.setScene(self.sceneCharImageList[4])        
     def parseChars(self):
         refImage = cv2.imread('refImage.png') # 读取参考图
-        for i in range(len(charImageList)):
+        for i in range(len(self.charImageList)):
             charNum = i+1
-            charIndex = (util.cv_getIndex(util.cv_getMidPoint(charImageList[i], refImage, eval('cv2.TM_CCOEFF' )))) # 计算出目标角色在参考图中的坐标位置（行与列）
-            charDataList[i] = data.refGrid[(charIndex[1]-1)][(charIndex[0]-1)]
-            charName = charDataList[i]['name']
+            charIndex = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[i], refImage, eval("cv2.%s" % self.algorithm )))) # 计算出目标角色在参考图中的坐标位置（行与列）
+            self.charDataList[i] = data.refGrid[(charIndex[1]-1)][(charIndex[0]-1)]
+            charName = self.charDataList[i]['name']
             print(charNum, charName, charIndex)
-    def handleResponse(self, response):
-        er = response.error()
-
-        if er == QtNetwork.QNetworkReply.NoError:
-
-            bytes_string = response.readAll()
-
-            json_ar = json.loads(str(bytes_string, 'utf-8'))
-            data = json_ar['form']
-
-            print('Name: {0}'.format(data['name']))
-            print('Age: {0}'.format(data['age']))
-
-            print()
-
-        else:
-            print("Error occurred: ", er)
-            print(response.errorString())
-    def do_query(self):
-        async def request(id_list):
-            headers = {
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
-                'authorization': config.apiKey,
-                'Content-Type': 'application/json'
-            }
-            async with httpx.AsyncClient() as client:
-                resp = await client.post('https://api.pcrdfans.com/x/v1/search',json={"_sign": "a", "def": id_list, "nonce": "a", "page": 1, "sort": 1, "ts": int(time.time()), "region": config.region}, headers=headers)
-                result = resp.json()
-            return result
-        raw_id_list = [charData['id'] for charData in charDataList]
-        id_list = [ x * 100 + 1 for x in raw_id_list ]
-        output=asyncio.run(request(id_list))
-        print(output)
-
-        
-        # try:
-        #     resp = await aiorequests.post('https://api.pcrdfans.com/x/v1/search', headers=header, json=payload, timeout=10)
-        #     res = await resp.json()
-        #     logger.debug(f'len(res)={len(res)}')
-        # except Exception as e:
-        #     logger.exception(e)
-        #     return None
-
-        # if res['code']:
-        #     logger.error(f"Arena query failed.\nResponse={res}\nPayload={payload}")
-        #     return None
-
-        # ret = []
-        # for entry in res['data']['result']:
-        #     eid = entry['id']
-        #     likes = get_likes(eid)
-        #     dislikes = get_dislikes(eid)
-        #     ret.append({
-        #         'qkey': gen_quick_key(eid, user_id),
-        #         'atk': [ chara.fromid(c['id'] // 100, c['star'], c['equip']) for c in entry['atk'] ],
-        #         'up': entry['up'],
-        #         'down': entry['down'],
-        #         'my_up': len(likes),
-        #         'my_down': len(dislikes),
-        #         'user_like': 1 if user_id in likes else -1 if user_id in dislikes else 0
-        #     })
-
-    
+        self.char1Label.setText(self.charDataList[0]['name'])
+        self.char2Label.setText(self.charDataList[1]['name'])
+        self.char3Label.setText(self.charDataList[2]['name'])
+        self.char4Label.setText(self.charDataList[3]['name'])
+        self.char5Label.setText(self.charDataList[4]['name'])
+   
         
     
 
 if __name__ == '__main__':
     # ### CLI测试部分
-    util.gui_promtHandle()  # 输出窗口句柄和标题
-    handle = int(input(["请输入句柄"]))
-    screenshot = util.gui_getScreenshotByHandle(handle)
-    copyX = config.simulator['marginOffset'][0]
-    copyY = config.simulator['marginOffset'][1]
-    copyWidth = screenshot.width() - config.simulator['marginOffset'][0] - config.simulator['marginOffset'][2]
-    copyHeight = screenshot.height() - config.simulator['marginOffset'][1] - config.simulator['marginOffset'][3]
-    gameImage = screenshot.copy(copyX, copyY, copyWidth, copyHeight) # 根据边框裁剪出游戏图像
-    translatedCharY = gameImage.height()*config.charLocationRatioConfig['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
-    translatedCharH = gameImage.height()*config.charLocationRatioConfig['h']
-    translatedCharW = gameImage.width()*config.charLocationRatioConfig['w']
-    charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH) for x in config.charLocationRatioConfig['x'] ] # 裁剪出对方每个角色头像
-    charDataList = [
-        {'name': '未知角色', 'id': 1000},
-        {'name': '未知角色', 'id': 1000},
-        {'name': '未知角色', 'id': 1000},
-        {'name': '未知角色', 'id': 1000},
-        {'name': '未知角色', 'id': 1000},
-]
- 
-
-
     app = QApplication(sys.argv)
-    mainWin = GUIMainWin()
-    mainWin.show()
-    sys.exit(app.exec_())
+    screen = app.primaryScreen()
+    loop = quamash.QEventLoop(app)
+    asyncio.set_event_loop(loop)  # NEW must set the event loop
+
+    with loop:
+        mainWin = GUIMainWin()
+        mainWin.show()
+        loop.run_forever()
+    

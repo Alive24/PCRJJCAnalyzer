@@ -1,9 +1,10 @@
-import util
 import json
+import util
 import time
 import config
 import data
 import cv2
+import os
 import sys
 import httpx
 import requests
@@ -17,10 +18,6 @@ from gui import Ui_PCRJJCAnalyzerGUI
 from solutionWidget import Ui_solutionWidget
 
 global apiKey
-
-
-
-
 
 class RequestRunnable(QRunnable):
     def __init__(self, url, json, mainGUI):
@@ -43,7 +40,7 @@ class RequestRunnable(QRunnable):
                                         Qt.QueuedConnection,
                                         Q_ARG(dict, solution))
         except Exception as e:
-            print(e)
+            print(e, r.json())
 
 class GUIsolutionWidget(QWidget, Ui_solutionWidget):
     def __init__(self, parent=None, solution=None):
@@ -251,7 +248,12 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.char4Avatar.setScene(self.sceneCharImageList[3])
         self.char5Avatar.setScene(self.sceneCharImageList[4])        
     def parseChars(self):
-        refImage = cv2.imread('refImage.png') # 读取参考图
+        if getattr(sys, 'frozen', False):
+            base_path = sys._MEIPASS
+        else:
+            base_path = os.path.abspath(".")
+        refImagePath = os.path.join(base_path, 'resource/refImage.png')
+        refImage = cv2.imread(refImagePath) # 读取参考图
         for i in range(len(self.charImageList)):
             charNum = i+1
             charIndex = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[i], refImage, eval("cv2.%s" % self.algorithm )))) # 计算出目标角色在参考图中的坐标位置（行与列）

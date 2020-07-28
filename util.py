@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import win32gui
+import os
 import numpy as np
 from matplotlib import pyplot as plt
 import config
@@ -84,6 +85,11 @@ def query_getPickAvatar(id:int) -> QImage:
     pickY = (pickIndex[0] - 1) * (config.refImg['UnitWidth'] + config.refImg['GapWidth'])
     pickW = config.refImg['UnitWidth']
     pickH = config.refImg['UnitWidth']
-    pickAvatar = QImage('refImage.png').copy(pickX, pickY, pickW, pickH)
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(".")
+    refImagePath = os.path.join(base_path, 'resource/refImage.png')
+    pickAvatar = QImage(refImagePath).copy(pickX, pickY, pickW, pickH)
     return pickAvatar
 

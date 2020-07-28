@@ -19,16 +19,17 @@ from solutionWidget import Ui_solutionWidget
 
 
 class RequestRunnable(QRunnable):
-    def __init__(self, url, json, mainGUI):
+    def __init__(self, url, json, mainGUI, apiKey):
         QRunnable.__init__(self)
         self.mUrl = url
         self.mJson = json
         self.w = mainGUI
+        self.wApiKey = apiKey
 
     def run(self):
         headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
-            'authorization': self.apiKey,
+            'authorization': self.wApiKey,
             'Content-Type': 'application/json'
         }
         r = requests.post(self.mUrl, json=self.mJson, headers=headers)
@@ -236,7 +237,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             "ts": int(time.time()), 
             "region": self.region
         }        
-        runnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self)
+        runnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
         QThreadPool.globalInstance().start(runnable)        
     @pyqtSlot(dict)
     def addSolution(self, solution):

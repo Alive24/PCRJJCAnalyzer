@@ -597,6 +597,29 @@
     <string>游戏句柄</string>
    </property>
   </widget>
+  <widget class="QLineEdit" name="apiKeylineEdit">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>620</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="apiKeyLabel">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>620</y>
+     <width>51</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>APIKey</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

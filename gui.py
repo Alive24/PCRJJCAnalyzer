@@ -175,6 +175,12 @@ class Ui_PCRJJCAnalyzerGUI(object):
         self.HandleSelector = QtWidgets.QLabel(PCRJJCAnalyzerGUI)
         self.HandleSelector.setGeometry(QtCore.QRect(20, 620, 81, 16))
         self.HandleSelector.setObjectName("HandleSelector")
+        self.apiKeylineEdit = QtWidgets.QLineEdit(PCRJJCAnalyzerGUI)
+        self.apiKeylineEdit.setGeometry(QtCore.QRect(500, 620, 113, 20))
+        self.apiKeylineEdit.setObjectName("apiKeylineEdit")
+        self.apiKeyLabel = QtWidgets.QLabel(PCRJJCAnalyzerGUI)
+        self.apiKeyLabel.setGeometry(QtCore.QRect(440, 620, 51, 16))
+        self.apiKeyLabel.setObjectName("apiKeyLabel")
 
         self.retranslateUi(PCRJJCAnalyzerGUI)
         QtCore.QMetaObject.connectSlotsByName(PCRJJCAnalyzerGUI)
@@ -210,3 +216,4 @@ class Ui_PCRJJCAnalyzerGUI(object):
         self.TM_SQDIFF.setText(_translate("PCRJJCAnalyzerGUI", "TM_SQDIFF"))
         self.TM_SQDIFF_NORMED.setText(_translate("PCRJJCAnalyzerGUI", "TM_SQDIFF_NORMED"))
         self.HandleSelector.setText(_translate("PCRJJCAnalyzerGUI", "游戏句柄"))
+        self.apiKeyLabel.setText(_translate("PCRJJCAnalyzerGUI", "APIKey"))

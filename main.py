@@ -17,7 +17,6 @@ from PyQt5.QtCore import QRunnable, QThreadPool, pyqtSlot, QThread, QMetaObject,
 from gui import Ui_PCRJJCAnalyzerGUI
 from solutionWidget import Ui_solutionWidget
 
-global apiKey
 
 class RequestRunnable(QRunnable):
     def __init__(self, url, json, mainGUI):
@@ -29,7 +28,7 @@ class RequestRunnable(QRunnable):
     def run(self):
         headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
-            'authorization': config.apiKey,
+            'authorization': self.apiKey,
             'Content-Type': 'application/json'
         }
         r = requests.post(self.mUrl, json=self.mJson, headers=headers)
@@ -124,8 +123,10 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.TM_CCORR_NORMED.clicked.connect(self.setTMAlgorithmOnClicked)
         self.TM_SQDIFF.clicked.connect(self.setTMAlgorithmOnClicked)
         self.TM_SQDIFF_NORMED.clicked.connect(self.setTMAlgorithmOnClicked)
+        self.apiKeylineEdit.textChanged.connect(self.setApiKey)
         self.region = config.region
         self.algorithm = config.algorithm
+        self.apiKey = config.apiKey
         if self.region == 1:
             self.setRegion1.setChecked(True)
         if self.region == 2:
@@ -157,6 +158,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.handleSelectorComboBox.addItems(self.titleList)
         self.handleSelectorComboBox.activated[str].connect(self.onHandleSelect)
         self.handle = 0
+    def setApiKey(self, apiKey):
+        self.apiKey = apiKey
     def onHandleSelect(self, handleTitle):
         def getHandle(handleTitle):
             for handle in self.handleList:

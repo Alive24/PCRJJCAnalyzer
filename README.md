@@ -17,6 +17,11 @@
 1. 启动后请在程序右下方填入你的apiKey（在作业网[公主连结Re: Dive Fan Club - Bot](https://www.pcrdfans.com/bot)处申请，请确认你当前ip与作业网中登记的是相同的，否则请重置ip）
 2. 请根据标题在程序左下方选择你运行PCR的模拟器句柄。
 3. 游戏中进入对战阵容选择画面后（目前需要人工确认），点击识别求解按钮。
+4. 在对战履历界面，可以点击履历解第二队和履历解第三队按钮查询相应的作业。
+5. 在队伍编程页面，可以点击查防守阵容按钮查询相应的作业。
+
+## 说明
+1. 2020-08-15 - 目前发现refImage均为三星后立绘，若有使用二星立绘的角色会识别失败，需要添加旧立绘头像数据。
 
 ## 工作原理
 1. 程序对句柄对应窗口进行截图后，参照config中浏览器相关的边距参数进行裁剪，仅保留游戏画面
@@ -27,7 +32,7 @@
 ## 示例（转到nga）（然而帖子被nga锁定了）
 https://nga.178.com/read.php?tid=22524716&_ff=-10308342
 
-![sample1](https://github.com/xct24/PCRJJCAnalyzer/blob/master/doc/img/sample1.png?raw=true)
+![sample2](https://github.com/xct24/PCRJJCAnalyzer/blob/master/doc/img/sample2.png?raw=true)
 
 ### 开发计划
 1. 基于PyQt5的图形界面 

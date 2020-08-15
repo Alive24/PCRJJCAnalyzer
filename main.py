@@ -27,6 +27,8 @@ class RequestRunnable(QRunnable):
         self.wApiKey = apiKey
 
     def run(self):
+        self.w.queryStatusTag.setText('查询中')
+        self.w.queryStatusTag.setStyleSheet("color:black")
         headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
             'authorization': self.wApiKey,
@@ -39,7 +41,12 @@ class RequestRunnable(QRunnable):
                 QMetaObject.invokeMethod(self.w, "addSolution",
                                         Qt.QueuedConnection,
                                         Q_ARG(dict, solution))
+            self.w.queryStatusTag.setText('等待查询')
+            self.w.queryStatusTag.setStyleSheet("color:green")
         except Exception as e:
+            self.w.queryStatusTag.setText('查询失败')
+            self.w.queryStatusTag.setStyleSheet("color:red")
+            QMessageBox.information(self, "Error", "%s, json=%s" % (e, r.json()))
             print(e, r.json())
 
 class GUIsolutionWidget(QWidget, Ui_solutionWidget):
@@ -159,6 +166,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.handleSelectorComboBox.addItems(self.titleList)
         self.handleSelectorComboBox.activated[str].connect(self.onHandleSelect)
         self.handle = 0
+        self.queryStatusTag.setText("请选择句柄")
+        self.queryStatusTag.setStyleSheet("color:red")
     def setApiKey(self, apiKey):
         self.apiKey = apiKey
     def onHandleSelect(self, handleTitle):
@@ -168,6 +177,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                     return handle
         targetHandle = getHandle(handleTitle)
         self.handle = targetHandle[0]
+        self.queryStatusTag.setText("等待查询")
+        self.queryStatusTag.setStyleSheet("color:green")
     def setTMAlgorithmOnClicked(self):
         clickedRadioButton = self.sender()
         if clickedRadioButton.isChecked():
@@ -196,6 +207,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
     def recognizeAndSolve(self):
         if self.handle == 0:
             QMessageBox.information(self, "No Handle", "No Handle")
+            self.queryStatusTag.setText("请选择句柄")
+            self.queryStatusTag.setStyleSheet("color:red")
             return
         self.sceneCharImageList = [QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene()]
         for scene in self.sceneCharImageList:

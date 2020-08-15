@@ -181,6 +181,10 @@ class Ui_PCRJJCAnalyzerGUI(object):
         self.apiKeyLabel = QtWidgets.QLabel(PCRJJCAnalyzerGUI)
         self.apiKeyLabel.setGeometry(QtCore.QRect(440, 620, 51, 16))
         self.apiKeyLabel.setObjectName("apiKeyLabel")
+        self.queryStatusTag = QtWidgets.QLabel(PCRJJCAnalyzerGUI)
+        self.queryStatusTag.setGeometry(QtCore.QRect(733, 70, 81, 20))
+        self.queryStatusTag.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.queryStatusTag.setObjectName("queryStatusTag")
 
         self.retranslateUi(PCRJJCAnalyzerGUI)
         QtCore.QMetaObject.connectSlotsByName(PCRJJCAnalyzerGUI)
@@ -217,3 +221,4 @@ class Ui_PCRJJCAnalyzerGUI(object):
         self.TM_SQDIFF_NORMED.setText(_translate("PCRJJCAnalyzerGUI", "TM_SQDIFF_NORMED"))
         self.HandleSelector.setText(_translate("PCRJJCAnalyzerGUI", "游戏句柄"))
         self.apiKeyLabel.setText(_translate("PCRJJCAnalyzerGUI", "APIKey"))
+        self.queryStatusTag.setText(_translate("PCRJJCAnalyzerGUI", "TextLabel"))

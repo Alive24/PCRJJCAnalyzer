@@ -36,7 +36,12 @@ class RequestRunnable(QRunnable):
         }
         r = requests.post(self.mUrl, json=self.mJson, headers=headers)
         QThread.msleep(1000)
+        print(r)
         try:
+            if len(r.json()['data']['result']) == 0:
+                self.w.queryStatusTag.setText('无结果！等待查询')
+                self.w.queryStatusTag.setStyleSheet("color:green")
+                return
             for solution in r.json()['data']['result']:
                 QMetaObject.invokeMethod(self.w, "addSolution",
                                         Qt.QueuedConnection,
@@ -46,8 +51,14 @@ class RequestRunnable(QRunnable):
         except Exception as e:
             self.w.queryStatusTag.setText('查询失败')
             self.w.queryStatusTag.setStyleSheet("color:red")
-            QMessageBox.information(self, "Error", "%s, json=%s" % (e, r.json()))
+            try:
+                QMessageBox.information(self.w, "Error", "%s, json=%s" % (e, r.json()))
+                return
+            except:
+                print("dead")
+                return                
             print(e, r.json())
+            return
 
 class GUIsolutionWidget(QWidget, Ui_solutionWidget):
     def __init__(self, parent=None, solution=None):
@@ -121,7 +132,10 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
     def __init__(self, parent=None):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
-        self.recognizeAndSolveButton.clicked.connect(self.recognizeAndSolve)
+        self.recognizeAndSolveButton.clicked.connect(lambda: self.recognizeAndSolve(1))
+        self.recognizeAndSolveButton_TeamTwoFromHisotry.clicked.connect(lambda: self.recognizeAndSolve(2))
+        self.recognizeAndSolveButton_TeamThreeFromHisotry.clicked.connect(lambda: self.recognizeAndSolve(3))
+        self.recognizeAndSolveButton_OwnTeam.clicked.connect(lambda: self.recognizeAndSolve(0))
         self.setRegion1.clicked.connect(self.setRegionOnClicked)
         self.setRegion2.clicked.connect(self.setRegionOnClicked)
         self.setRegion3.clicked.connect(self.setRegionOnClicked)
@@ -204,7 +218,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                 self.region = 2
             if clickedRadioButton.objectName() == "setRegion3":
                 self.region = 3
-    def recognizeAndSolve(self):
+    def recognizeAndSolve(self, teamNum:[0, 1, 2, 3]):
         if self.handle == 0:
             QMessageBox.information(self, "No Handle", "No Handle")
             self.queryStatusTag.setText("请选择句柄")
@@ -221,10 +235,26 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         copyWidth = screenshot.width() - config.simulator['marginOffset'][0] - config.simulator['marginOffset'][2]
         copyHeight = screenshot.height() - config.simulator['marginOffset'][1] - config.simulator['marginOffset'][3]
         gameImage = screenshot.copy(copyX, copyY, copyWidth, copyHeight) # 根据边框裁剪出游戏图像
-        translatedCharY = gameImage.height()*config.charLocationRatioConfig['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
-        translatedCharH = gameImage.height()*config.charLocationRatioConfig['h']
-        translatedCharW = gameImage.width()*config.charLocationRatioConfig['w']
-        self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH) for x in config.charLocationRatioConfig['x'] ] # 裁剪出对方每个角色头像
+        if teamNum==0:
+            translatedCharY = gameImage.height()*config.charLocationRatioConfig_OwnTeam['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            translatedCharH = gameImage.height()*config.charLocationRatioConfig_OwnTeam['h']
+            translatedCharW = gameImage.width()*config.charLocationRatioConfig_OwnTeam['w']
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_OwnTeam['x'] ] # 裁剪出对方每个角色头像
+        if teamNum==1:
+            translatedCharY = gameImage.height()*config.charLocationRatioConfig_TeamOne['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            translatedCharH = gameImage.height()*config.charLocationRatioConfig_TeamOne['h']
+            translatedCharW = gameImage.width()*config.charLocationRatioConfig_TeamOne['w']
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_TeamOne['x'] ] # 裁剪出对方每个角色头像
+        if teamNum==2:
+            translatedCharY = gameImage.height()*config.charLocationRatioConfig_TeamTwo['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            translatedCharH = gameImage.height()*config.charLocationRatioConfig_TeamTwo['h']
+            translatedCharW = gameImage.width()*config.charLocationRatioConfig_TeamTwo['w']
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_TeamTwo['x'] ] # 裁剪出对方每个角色头像
+        if teamNum==3:
+            translatedCharY = gameImage.height()*config.charLocationRatioConfig_TeamThree['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            translatedCharH = gameImage.height()*config.charLocationRatioConfig_TeamThree['h']
+            translatedCharW = gameImage.width()*config.charLocationRatioConfig_TeamThree['w']
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_TeamThree['x'] ] # 裁剪出对方每个角色头像
         self.charDataList = [
             {'name': '未知角色', 'id': 1000},
             {'name': '未知角色', 'id': 1000},
@@ -251,7 +281,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             "region": self.region
         }        
         runnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
-        QThreadPool.globalInstance().start(runnable)        
+        QThreadPool.globalInstance().start(runnable)     
     @pyqtSlot(dict)
     def addSolution(self, solution):
         self.solutionListLayout.addWidget(GUIsolutionWidget(solution=solution))

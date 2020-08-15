@@ -27,6 +27,8 @@
 ## 示例（转到nga）（然而帖子被nga锁定了）
 https://nga.178.com/read.php?tid=22524716&_ff=-10308342
 
+![sample1](https://github.com/xct24/PCRJJCAnalyzer/blob/master/doc/img/sample1.png?raw=true)
+
 ### 开发计划
 1. 基于PyQt5的图形界面 
     - 已初步完成

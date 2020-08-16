@@ -1,5 +1,5 @@
 # PCRJJCAnalyzer
-
+使用开发交流QQ群：931482960
 ## 前言
 
 由于JJC和PJJC的奖励太好，虽然不大喜欢玩PVP但不得不打，好在有[作业网](https://www.pcrdfans.com/battle)的存在减少了很多精力消耗。然而实际操作过程中，尤其是在PJJC中，需要来来回回点很多次才能确定是否可以使用该作业，因此希望通过图像识别的方式再加上已经实装在[HoshinoBot](https://github.com/Ice-Cirno/HoshinoBot)中的API查询方法做到自动查询，并在简单分析后指导应当如何选择阵容或者是否需要刷新列表。

@@ -132,10 +132,11 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
     def __init__(self, parent=None):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
-        self.recognizeAndSolveButton.clicked.connect(lambda: self.recognizeAndSolve(1))
+        self.recognizeAndSolveButton.clicked.connect(lambda: self.recognizeAndSolve(0))
+        self.recognizeAndSolveButton_TeamOneFromHisotry.clicked.connect(lambda: self.recognizeAndSolve(1))
         self.recognizeAndSolveButton_TeamTwoFromHisotry.clicked.connect(lambda: self.recognizeAndSolve(2))
         self.recognizeAndSolveButton_TeamThreeFromHisotry.clicked.connect(lambda: self.recognizeAndSolve(3))
-        self.recognizeAndSolveButton_OwnTeam.clicked.connect(lambda: self.recognizeAndSolve(0))
+        self.recognizeAndSolveButton_OwnTeam.clicked.connect(lambda: self.recognizeAndSolve(-1))
         self.setRegion1.clicked.connect(self.setRegionOnClicked)
         self.setRegion2.clicked.connect(self.setRegionOnClicked)
         self.setRegion3.clicked.connect(self.setRegionOnClicked)
@@ -218,7 +219,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                 self.region = 2
             if clickedRadioButton.objectName() == "setRegion3":
                 self.region = 3
-    def recognizeAndSolve(self, teamNum:[0, 1, 2, 3]):
+    def recognizeAndSolve(self, teamNum:[0, 1, 2, 3, 4]):
         if self.handle == 0:
             QMessageBox.information(self, "No Handle", "No Handle")
             self.queryStatusTag.setText("请选择句柄")
@@ -236,25 +237,35 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         copyHeight = screenshot.height() - config.simulator['marginOffset'][1] - config.simulator['marginOffset'][3]
         gameImage = screenshot.copy(copyX, copyY, copyWidth, copyHeight) # 根据边框裁剪出游戏图像
         if teamNum==0:
+            # 当前目标队，右上
+            translatedCharY = gameImage.height()*config.charLocationRatioConfig_CurrentEnemyTeam['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            translatedCharH = gameImage.height()*config.charLocationRatioConfig_CurrentEnemyTeam['h']
+            translatedCharW = gameImage.width()*config.charLocationRatioConfig_CurrentEnemyTeam['w']
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_CurrentEnemyTeam['x'] ] # 裁剪出对方每个角色头像
+        if teamNum==1:
+            # 履历一队
+            translatedCharY = gameImage.height()*config.charLocationRatioConfig_HistoryTeamOne['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            translatedCharH = gameImage.height()*config.charLocationRatioConfig_HistoryTeamOne['h']
+            translatedCharW = gameImage.width()*config.charLocationRatioConfig_HistoryTeamOne['w']
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamOne['x'] ] # 裁剪出对方每个角色头像
+        if teamNum==2:
+            # 履历二队
+            translatedCharY = gameImage.height()*config.charLocationRatioConfig_HistoryTeamTwo['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            translatedCharH = gameImage.height()*config.charLocationRatioConfig_HistoryTeamTwo['h']
+            translatedCharW = gameImage.width()*config.charLocationRatioConfig_HistoryTeamTwo['w']
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamTwo['x'] ] # 裁剪出对方每个角色头像
+        if teamNum==3:
+            # 履历三队
+            translatedCharY = gameImage.height()*config.charLocationRatioConfig_HistoryTeamThree['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            translatedCharH = gameImage.height()*config.charLocationRatioConfig_HistoryTeamThree['h']
+            translatedCharW = gameImage.width()*config.charLocationRatioConfig_HistoryTeamThree['w']
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamThree['x'] ] # 裁剪出对方每个角色头像
+        if teamNum==-1:
+            # 当前防守队
             translatedCharY = gameImage.height()*config.charLocationRatioConfig_OwnTeam['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
             translatedCharH = gameImage.height()*config.charLocationRatioConfig_OwnTeam['h']
             translatedCharW = gameImage.width()*config.charLocationRatioConfig_OwnTeam['w']
             self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_OwnTeam['x'] ] # 裁剪出对方每个角色头像
-        if teamNum==1:
-            translatedCharY = gameImage.height()*config.charLocationRatioConfig_TeamOne['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
-            translatedCharH = gameImage.height()*config.charLocationRatioConfig_TeamOne['h']
-            translatedCharW = gameImage.width()*config.charLocationRatioConfig_TeamOne['w']
-            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_TeamOne['x'] ] # 裁剪出对方每个角色头像
-        if teamNum==2:
-            translatedCharY = gameImage.height()*config.charLocationRatioConfig_TeamTwo['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
-            translatedCharH = gameImage.height()*config.charLocationRatioConfig_TeamTwo['h']
-            translatedCharW = gameImage.width()*config.charLocationRatioConfig_TeamTwo['w']
-            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_TeamTwo['x'] ] # 裁剪出对方每个角色头像
-        if teamNum==3:
-            translatedCharY = gameImage.height()*config.charLocationRatioConfig_TeamThree['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
-            translatedCharH = gameImage.height()*config.charLocationRatioConfig_TeamThree['h']
-            translatedCharW = gameImage.width()*config.charLocationRatioConfig_TeamThree['w']
-            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_TeamThree['x'] ] # 裁剪出对方每个角色头像
         self.charDataList = [
             {'name': '未知角色', 'id': 1000},
             {'name': '未知角色', 'id': 1000},

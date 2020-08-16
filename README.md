@@ -8,17 +8,21 @@
 
 使用OpenCV所提供的matchTemplate功能，识别当前模拟器处于对战阵容选择画面时显示的对方阵容具体构成，然后调用[公主连结Re: Dive Fan Club](https://www.pcrdfans.com/battle)所提供的接口进行阵容查询，并按照结果指导操作，以减少玩家精力消耗。
 
-## 编译方法
-1. 创建适合的python环境（开发环境下为conda建立的python3.7虚拟环境）
-2. 使用`pip install -r requirements.txt`安装环境
-3. 使用`pyinstaller .\main.spec`以文件夹形式编译（启动速度更快）或使用`pyinstaller .\main-onefile.spec`以单文件形式编译（启动速度稍慢）
+
 
 ## 使用流程（当前初版图形界面测试阶段）
+0. 程序可在Release中下载。另有onefile单文件版本，但启动速度会稍慢一些。
 1. 启动后请在程序右下方填入你的apiKey（在作业网[公主连结Re: Dive Fan Club - Bot](https://www.pcrdfans.com/bot)处申请，请确认你当前ip与作业网中登记的是相同的，否则请重置ip）
 2. 请根据标题在程序左下方选择你运行PCR的模拟器句柄。
 3. 游戏中进入对战阵容选择画面后（目前需要人工确认），点击识别求解按钮。
 4. 在对战履历界面，可以点击履历解第一队、履历解第二队和履历解第三队按钮查询相应的作业。
 5. 在队伍编程页面，可以点击查防守阵容按钮查询相应的作业。
+
+
+## 编译方法
+1. 创建适合的python环境（开发环境下为conda建立的python3.7虚拟环境）
+2. 使用`pip install -r requirements.txt`安装环境
+3. 使用`pyinstaller .\main.spec`以文件夹形式编译（启动速度更快）或使用`pyinstaller .\main-onefile.spec`以单文件形式编译（启动速度稍慢）
 
 ## 工作原理
 1. 程序对句柄对应窗口进行截图后，参照config中浏览器相关的边距参数进行裁剪，仅保留游戏画面

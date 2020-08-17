@@ -31,9 +31,9 @@
 4. 根据中点和config中的refImage相关数据，判断其行列坐标并输出
 
 ## 示例
-[PCRJJCAnalyzer - 基本用法展示 1](https://www.bilibili.com/video/bv1kk4y1175r)
-[PCRJJCAnalyzer - 基本用法展示 2 (PJJC)](https://www.bilibili.com/video/bv1K5411h783)
-[PCRJJCAnalyzer - 基本用法展示 3 (防守阵容自查)](https://www.bilibili.com/video/bv1FK411M7Wn)
+- [PCRJJCAnalyzer - 基本用法展示 1](https://www.bilibili.com/video/bv1kk4y1175r)
+- [PCRJJCAnalyzer - 基本用法展示 2 (PJJC)](https://www.bilibili.com/video/bv1K5411h783)
+- [PCRJJCAnalyzer - 基本用法展示 3 (防守阵容自查)](https://www.bilibili.com/video/bv1FK411M7Wn)
 
 ![sample3](https://github.com/xct24/PCRJJCAnalyzer/blob/master/doc/img/sample3.png?raw=true)
 

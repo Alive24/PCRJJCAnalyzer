@@ -303,6 +303,11 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             if clickedRadioButton.objectName() == "setRegion3":
                 self.region = 3
     def recognizeAndSolve(self, teamNum:[0, 1, 2, 3, 4]):
+        self.char1Dropbox.clear()
+        self.char2Dropbox.clear()
+        self.char3Dropbox.clear()
+        self.char4Dropbox.clear()
+        self.char5Dropbox.clear()
         if self.handle == 0:
             QMessageBox.information(self, "No Handle", "No Handle")
             self.queryStatusTag.setText("请选择句柄")

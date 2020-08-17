@@ -1,5 +1,5 @@
 # PCRJJCAnalyzer
-
+使用开发交流QQ群：931482960
 ## 前言
 
 由于JJC和PJJC的奖励太好，虽然不大喜欢玩PVP但不得不打，好在有[作业网](https://www.pcrdfans.com/battle)的存在减少了很多精力消耗。然而实际操作过程中，尤其是在PJJC中，需要来来回回点很多次才能确定是否可以使用该作业，因此希望通过图像识别的方式再加上已经实装在[HoshinoBot](https://github.com/Ice-Cirno/HoshinoBot)中的API查询方法做到自动查询，并在简单分析后指导应当如何选择阵容或者是否需要刷新列表。
@@ -30,8 +30,10 @@
 3. 以每个角色的头像对照参考图片（refImage，来自于[公主连结Re: Dive Fan Club](https://www.pcrdfans.com/battle)）进行matchTemplate后，获得识别结果的坐标的中点
 4. 根据中点和config中的refImage相关数据，判断其行列坐标并输出
 
-## 示例（转到nga）（然而帖子被nga锁定了）
-https://nga.178.com/read.php?tid=22524716&_ff=-10308342
+## 示例
+- [PCRJJCAnalyzer - 基本用法展示 1](https://www.bilibili.com/video/bv1kk4y1175r)
+- [PCRJJCAnalyzer - 基本用法展示 2 (PJJC)](https://www.bilibili.com/video/bv1K5411h783)
+- [PCRJJCAnalyzer - 基本用法展示 3 (防守阵容自查)](https://www.bilibili.com/video/bv1FK411M7Wn)
 
 ![sample3](https://github.com/xct24/PCRJJCAnalyzer/blob/master/doc/img/sample3.png?raw=true)
 
@@ -47,6 +49,11 @@ https://nga.178.com/read.php?tid=22524716&_ff=-10308342
 6. 添加防守阵容自查功能
 7. 用户配置文件储存apiKey，以及收藏/黑名单作业功能
 
+
+## 其他讨论地址
+NGA：https://nga.178.com/read.php?tid=22983407
+Bilibili：https://www.bilibili.com/read/cv7192290
+BigFun：https://www.bigfun.cn/post/526503
 
 ## 声明
 1. 此工具遵循相关开源协议，不可作商业用途。

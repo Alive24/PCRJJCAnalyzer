@@ -265,32 +265,6 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLabel" name="char1Label">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>140</y>
-     <width>81</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>角色1</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="char2Label">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>240</y>
-     <width>81</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>角色2</string>
-   </property>
-  </widget>
   <widget class="QGraphicsView" name="char2Star">
    <property name="geometry">
     <rect>
@@ -311,19 +285,6 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLabel" name="char3Label">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>340</y>
-     <width>81</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>角色3</string>
-   </property>
-  </widget>
   <widget class="QGraphicsView" name="char4Star">
    <property name="geometry">
     <rect>
@@ -334,19 +295,6 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLabel" name="char4Label">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>440</y>
-     <width>81</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>角色4</string>
-   </property>
-  </widget>
   <widget class="QGraphicsView" name="char5Star">
    <property name="geometry">
     <rect>
@@ -355,19 +303,6 @@
      <width>81</width>
      <height>21</height>
     </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="char5Label">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>540</y>
-     <width>81</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>角色5</string>
    </property>
   </widget>
   <widget class="QScrollArea" name="solutionListScrollArea">
@@ -670,6 +605,56 @@
    </property>
    <property name="text">
     <string>履历解第一队</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="char1Dropbox">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>130</y>
+     <width>81</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="char2Dropbox">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>230</y>
+     <width>81</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="char3Dropbox">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>330</y>
+     <width>81</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="char4Dropbox">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>430</y>
+     <width>81</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="char5Dropbox">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>530</y>
+     <width>81</width>
+     <height>22</height>
+    </rect>
    </property>
   </widget>
  </widget>

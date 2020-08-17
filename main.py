@@ -18,6 +18,55 @@ from gui import Ui_PCRJJCAnalyzerGUI
 from solutionWidget import Ui_solutionWidget
 
 
+class generateCharCandidateRunnable(QRunnable):
+    def __init__(self, charImageList, mainGUI, i, ):
+        QRunnable.__init__(self)
+        self.charImageList = charImageList
+        self.w = mainGUI
+        self.i = i
+    def run(self):
+        if getattr(sys, 'frozen', False):
+            base_path = sys._MEIPASS
+        else:
+            base_path = os.path.abspath(".")
+        refImagePath = os.path.join(base_path, 'resource/refImage.png')
+        refImage = cv2.imread(refImagePath) # 读取参考图
+        charIndexCandidateList = [[],[],[],[],[],[]]
+        charCandidateList = [
+                {'name': '未知角色', 'id': 1000},
+                {'name': '未知角色', 'id': 1000},
+                {'name': '未知角色', 'id': 1000},
+                {'name': '未知角色', 'id': 1000},
+                {'name': '未知角色', 'id': 1000},
+                {'name': '未知角色', 'id': 1000},
+        ]
+        charIndexCandidateList[0] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCOEFF"))))
+        charIndexCandidateList[1] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCOEFF_NORMED"))))
+        charIndexCandidateList[2] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCORR"))))
+        charIndexCandidateList[3] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCORR_NORMED"))))
+        charIndexCandidateList[4] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_SQDIFF"))))
+        charIndexCandidateList[5] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_SQDIFF_NORMED"))))
+        for j in range(6):
+            charCandidateList[j]= data.refGrid[(charIndexCandidateList[j][1]-1)][(charIndexCandidateList[j][0]-1)]
+        charDropboxItemList = []
+        for j in range(6):
+            charDropboxItemList.append(charCandidateList[j]['name'])
+        if self.i == 0:
+            self.w.char1CandidateList = charCandidateList
+            self.w.char1Dropbox.addItems(charDropboxItemList)
+        if self.i == 1:
+            self.w.char2CandidateList = charCandidateList
+            self.w.char2Dropbox.addItems(charDropboxItemList)
+        if self.i == 2:
+            self.w.char3CandidateList = charCandidateList
+            self.w.char3Dropbox.addItems(charDropboxItemList)
+        if self.i == 3:
+            self.w.char4CandidateList = charCandidateList
+            self.w.char4Dropbox.addItems(charDropboxItemList)
+        if self.i == 4:
+            self.w.char5CandidateList = charCandidateList
+            self.w.char5Dropbox.addItems(charDropboxItemList)
+
 class RequestRunnable(QRunnable):
     def __init__(self, url, json, mainGUI, apiKey):
         QRunnable.__init__(self)
@@ -49,15 +98,8 @@ class RequestRunnable(QRunnable):
             self.w.queryStatusTag.setText('等待查询')
             self.w.queryStatusTag.setStyleSheet("color:green")
         except Exception as e:
-            self.w.queryStatusTag.setText('查询失败')
+            self.w.queryStatusTag.setText('查询失败(%s)' % r.json()['code'])
             self.w.queryStatusTag.setStyleSheet("color:red")
-            try:
-                QMessageBox.information(self.w, "Error", "%s, json=%s" % (e, r.json()))
-                return
-            except:
-                print("dead")
-                return                
-            print(e, r.json())
             return
 
 class GUIsolutionWidget(QWidget, Ui_solutionWidget):
@@ -180,11 +222,52 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.titleList = [handle[1] for handle in self.handleList]
         self.handleSelectorComboBox.addItems(self.titleList)
         self.handleSelectorComboBox.activated[str].connect(self.onHandleSelect)
+        self.char1Dropbox.activated[str].connect(lambda candidateName, charNum=1: self.onCharCandidateSelect(candidateName, charNum))
+        self.char2Dropbox.activated[str].connect(lambda candidateName, charNum=2: self.onCharCandidateSelect(candidateName, charNum))
+        self.char3Dropbox.activated[str].connect(lambda candidateName, charNum=3: self.onCharCandidateSelect(candidateName, charNum))
+        self.char4Dropbox.activated[str].connect(lambda candidateName, charNum=4: self.onCharCandidateSelect(candidateName, charNum))
+        self.char5Dropbox.activated[str].connect(lambda candidateName, charNum=5: self.onCharCandidateSelect(candidateName, charNum))
         self.handle = 0
         self.queryStatusTag.setText("请选择句柄")
         self.queryStatusTag.setStyleSheet("color:red")
+    
     def setApiKey(self, apiKey):
         self.apiKey = apiKey
+    def onCharCandidateSelect(self, candidateName, charNum:[1,2,3,4,5]):
+        if charNum == 1:
+            for i in range(6):
+                if self.char1CandidateList[i]['name'] == candidateName:
+                    self.charDataList[0] = self.char1CandidateList[i]
+        if charNum == 2:
+            for i in range(6):
+                if self.char2CandidateList[i]['name'] == candidateName:
+                    self.charDataList[1] = self.char2CandidateList[i]
+        if charNum == 3:
+            for i in range(6):
+                if self.char3CandidateList[i]['name'] == candidateName:
+                    self.charDataList[2] = self.char3CandidateList[i]
+        if charNum == 4:
+            for i in range(6):
+                if self.char4CandidateList[i]['name'] == candidateName:
+                    self.charDataList[3] = self.char4CandidateList[i]
+        if charNum == 5:
+            for i in range(6):
+                if self.char5CandidateList[i]['name'] == candidateName:
+                    self.charDataList[4] = self.char5CandidateList[i]
+        raw_id_list = [charData['id'] for charData in self.charDataList]
+        id_list = [ x * 100 + 1 for x in raw_id_list ]
+        payload = {
+            "_sign": "a", 
+            "def": id_list, 
+            "nonce": "a", 
+            "page": 1, 
+            "sort": 1, 
+            "ts": int(time.time()), 
+            "region": self.region
+        }        
+        queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
+        QThreadPool.globalInstance().start(queryRunnable)
+
     def onHandleSelect(self, handleTitle):
         def getHandle(handleTitle):
             for handle in self.handleList:
@@ -291,8 +374,11 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             "ts": int(time.time()), 
             "region": self.region
         }        
-        runnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
-        QThreadPool.globalInstance().start(runnable)     
+        queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
+        QThreadPool.globalInstance().start(queryRunnable)
+        for i in range(5):
+            completeDropboxRunnable = generateCharCandidateRunnable(self.charImageList, self, i)
+            QThreadPool.globalInstance().start(completeDropboxRunnable)
     @pyqtSlot(dict)
     def addSolution(self, solution):
         self.solutionListLayout.addWidget(GUIsolutionWidget(solution=solution))
@@ -318,11 +404,11 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             self.charDataList[i] = data.refGrid[(charIndex[1]-1)][(charIndex[0]-1)]
             charName = self.charDataList[i]['name']
             print(charNum, charName, charIndex)
-        self.char1Label.setText(self.charDataList[0]['name'])
-        self.char2Label.setText(self.charDataList[1]['name'])
-        self.char3Label.setText(self.charDataList[2]['name'])
-        self.char4Label.setText(self.charDataList[3]['name'])
-        self.char5Label.setText(self.charDataList[4]['name'])
+        self.char1Dropbox.addItem(self.charDataList[0]['name'])
+        self.char2Dropbox.addItem(self.charDataList[1]['name'])
+        self.char3Dropbox.addItem(self.charDataList[2]['name'])
+        self.char4Dropbox.addItem(self.charDataList[3]['name'])
+        self.char5Dropbox.addItem(self.charDataList[4]['name'])
    
         
     

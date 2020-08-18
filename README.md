@@ -1,5 +1,10 @@
 # PCRJJCAnalyzer
 使用开发交流QQ群：931482960
+仓库地址：https://github.com/xct24/PCRJJCAnalyzer
+NGA讨论地址：https://nga.178.com/read.php?tid=22983407
+BigFun讨论地址：https://www.bigfun.cn/post/526503
+Bot申请地址（暂未开放）：https://www.pcrdfans.com/bot
+
 ## 前言
 
 由于JJC和PJJC的奖励太好，虽然不大喜欢玩PVP但不得不打，好在有[作业网](https://www.pcrdfans.com/battle)的存在减少了很多精力消耗。然而实际操作过程中，尤其是在PJJC中，需要来来回回点很多次才能确定是否可以使用该作业，因此希望通过图像识别的方式再加上已经实装在[HoshinoBot](https://github.com/Ice-Cirno/HoshinoBot)中的API查询方法做到自动查询，并在简单分析后指导应当如何选择阵容或者是否需要刷新列表。
@@ -51,9 +56,9 @@
 
 
 ## 其他讨论地址
-NGA：https://nga.178.com/read.php?tid=22983407
-Bilibili：https://www.bilibili.com/read/cv7192290
-BigFun：https://www.bigfun.cn/post/526503
+- NGA：https://nga.178.com/read.php?tid=22983407
+- Bilibili：https://www.bilibili.com/read/cv7192290
+- BigFun：https://www.bigfun.cn/post/526503
 
 ## 声明
 1. 此工具遵循相关开源协议，不可作商业用途。

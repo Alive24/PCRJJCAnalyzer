@@ -1,3 +1,6 @@
+import hashlib
+import random
+import string
 import json
 import util
 import time
@@ -83,6 +86,9 @@ class RequestRunnable(QRunnable):
             'authorization': self.wApiKey,
             'Content-Type': 'application/json'
         }
+        if self.wApiKey == '':
+            headers["referer"] = 'https://www.pcrdfans.com/battle'
+            headers["origin"] = 'https://www.pcrdfans.com'
         r = requests.post(self.mUrl, json=self.mJson, headers=headers)
         QThread.msleep(1000)
         print(r)
@@ -256,15 +262,23 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                     self.charDataList[4] = self.char5CandidateList[i]
         raw_id_list = [charData['id'] for charData in self.charDataList]
         id_list = [ x * 100 + 1 for x in raw_id_list ]
+        nonceGen = 'a'
+        if self.apiKey == '':
+            nonceGen = ''.join(random.sample(string.ascii_lowercase + string.digits, 16))
         payload = {
-            "_sign": "a", 
-            "def": id_list, 
-            "nonce": "a", 
-            "page": 1, 
-            "sort": 1, 
-            "ts": int(time.time()), 
-            "region": self.region
-        }        
+            "def": id_list,
+            "nonce": nonceGen,
+            "page": 1,
+            "region": self.region,
+            "sort": 1,
+            "ts": int(time.time())
+        }
+        signStr = 'a'
+        if self.apiKey == '':
+            tmp = (json.dumps(payload, separators=(',', ':')) + 'e437591b87a9e7d10b7ad73465bbc0e9' + nonceGen).encode(
+                encoding='utf-8')
+            signStr = hashlib.md5(tmp).hexdigest()
+        payload["_sign"] = signStr    
         queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
         QThreadPool.globalInstance().start(queryRunnable)
 
@@ -370,15 +384,23 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.parseChars()
         raw_id_list = [charData['id'] for charData in self.charDataList]
         id_list = [ x * 100 + 1 for x in raw_id_list ]
+        nonceGen = 'a'
+        if self.apiKey == '':
+            nonceGen = ''.join(random.sample(string.ascii_lowercase + string.digits, 16))
         payload = {
-            "_sign": "a", 
-            "def": id_list, 
-            "nonce": "a", 
-            "page": 1, 
-            "sort": 1, 
-            "ts": int(time.time()), 
-            "region": self.region
-        }        
+            "def": id_list,
+            "nonce": nonceGen,
+            "page": 1,
+            "region": self.region,
+            "sort": 1,
+            "ts": int(time.time())
+        }
+        signStr = 'a'
+        if self.apiKey == '':
+            tmp = (json.dumps(payload, separators=(',', ':')) + 'e437591b87a9e7d10b7ad73465bbc0e9' + nonceGen).encode(
+                encoding='utf-8')
+            signStr = hashlib.md5(tmp).hexdigest()
+        payload["_sign"] = signStr     
         queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
         QThreadPool.globalInstance().start(queryRunnable)
         for i in range(5):

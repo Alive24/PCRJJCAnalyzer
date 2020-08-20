@@ -3,6 +3,7 @@
 - 仓库地址：https://github.com/xct24/PCRJJCAnalyzer
 - NGA讨论地址：https://nga.178.com/read.php?tid=22983407
 - BigFun讨论地址：https://www.bigfun.cn/post/526503
+- 哔哩哔哩讨论地址：https://www.bilibili.com/read/cv7192290
 - Bot申请地址（暂未开放）：https://www.pcrdfans.com/bot
 
 ## 前言

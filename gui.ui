@@ -82,7 +82,7 @@
   </widget>
   <widget class="QRadioButton" name="team3RadioButton">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -95,10 +95,13 @@
    <property name="text">
     <string>第三队</string>
    </property>
+   <attribute name="buttonGroup">
+    <string notr="true">activeTeamNumButtonGroup</string>
+   </attribute>
   </widget>
   <widget class="QRadioButton" name="team2RadioButton">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -111,10 +114,13 @@
    <property name="text">
     <string>第二队</string>
    </property>
+   <attribute name="buttonGroup">
+    <string notr="true">activeTeamNumButtonGroup</string>
+   </attribute>
   </widget>
   <widget class="QRadioButton" name="team1RadioButton">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -127,6 +133,9 @@
    <property name="text">
     <string>第一队</string>
    </property>
+   <attribute name="buttonGroup">
+    <string notr="true">activeTeamNumButtonGroup</string>
+   </attribute>
   </widget>
   <widget class="QPushButton" name="pushButton">
    <property name="enabled">
@@ -397,7 +406,7 @@
     <string>TM_CCOEFF_NORMED</string>
    </property>
    <attribute name="buttonGroup">
-    <string notr="true">buttonGroup</string>
+    <string notr="true">algorithmButtonGroup</string>
    </attribute>
   </widget>
   <widget class="QLabel" name="TMAlgorithm">
@@ -426,7 +435,7 @@
     <string>TM_CCOEFF</string>
    </property>
    <attribute name="buttonGroup">
-    <string notr="true">buttonGroup</string>
+    <string notr="true">algorithmButtonGroup</string>
    </attribute>
   </widget>
   <widget class="QRadioButton" name="TM_CCORR">
@@ -442,7 +451,7 @@
     <string>TM_CCORR</string>
    </property>
    <attribute name="buttonGroup">
-    <string notr="true">buttonGroup</string>
+    <string notr="true">algorithmButtonGroup</string>
    </attribute>
   </widget>
   <widget class="QRadioButton" name="TM_CCORR_NORMED">
@@ -458,7 +467,7 @@
     <string>TM_CCORR_NORMED</string>
    </property>
    <attribute name="buttonGroup">
-    <string notr="true">buttonGroup</string>
+    <string notr="true">algorithmButtonGroup</string>
    </attribute>
   </widget>
   <widget class="QRadioButton" name="TM_SQDIFF">
@@ -474,7 +483,7 @@
     <string>TM_SQDIFF</string>
    </property>
    <attribute name="buttonGroup">
-    <string notr="true">buttonGroup</string>
+    <string notr="true">algorithmButtonGroup</string>
    </attribute>
   </widget>
   <widget class="QRadioButton" name="TM_SQDIFF_NORMED">
@@ -490,7 +499,7 @@
     <string>TM_SQDIFF_NORMED</string>
    </property>
    <attribute name="buttonGroup">
-    <string notr="true">buttonGroup</string>
+    <string notr="true">algorithmButtonGroup</string>
    </attribute>
   </widget>
   <widget class="QComboBox" name="handleSelectorComboBox">
@@ -661,7 +670,8 @@
  <resources/>
  <connections/>
  <buttongroups>
+  <buttongroup name="algorithmButtonGroup"/>
   <buttongroup name="regionButtonGroup"/>
-  <buttongroup name="buttonGroup"/>
+  <buttongroup name="activeTeamNumButtonGroup"/>
  </buttongroups>
 </ui>

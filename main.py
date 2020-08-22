@@ -1,5 +1,9 @@
+#! /usr/bin/env python
+#-*- coding: utf-8 -*-
+
 import json
 import util
+import copy
 import time
 import config
 import data
@@ -53,19 +57,50 @@ class generateCharCandidateRunnable(QRunnable):
             charDropboxItemList.append(charCandidateList[j]['name'])
         if self.i == 0:
             self.w.char1CandidateList = charCandidateList
+            if self.w.activeTeamNum ==1:
+                self.w.queryResultStorageTeam1['char1CandidateList'] = charCandidateList
+            if self.w.activeTeamNum ==2:
+                self.w.queryResultStorageTeam2['char1CandidateList'] = charCandidateList
+            if self.w.activeTeamNum ==3:
+                self.w.queryResultStorageTeam3['char1CandidateList'] = charCandidateList
             self.w.char1Dropbox.addItems(charDropboxItemList)
         if self.i == 1:
             self.w.char2CandidateList = charCandidateList
+            if self.w.activeTeamNum ==1:
+                self.w.queryResultStorageTeam1['char2CandidateList'] = charCandidateList
+            if self.w.activeTeamNum ==2:
+                self.w.queryResultStorageTeam2['char2CandidateList'] = charCandidateList
+            if self.w.activeTeamNum ==3:
+                self.w.queryResultStorageTeam3['char2CandidateList'] = charCandidateList
             self.w.char2Dropbox.addItems(charDropboxItemList)
         if self.i == 2:
             self.w.char3CandidateList = charCandidateList
+            if self.w.activeTeamNum ==1:
+                self.w.queryResultStorageTeam1['char3CandidateList'] = charCandidateList
+            if self.w.activeTeamNum ==2:
+                self.w.queryResultStorageTeam2['char3CandidateList'] = charCandidateList
+            if self.w.activeTeamNum ==3:
+                self.w.queryResultStorageTeam3['char3CandidateList'] = charCandidateList
             self.w.char3Dropbox.addItems(charDropboxItemList)
         if self.i == 3:
             self.w.char4CandidateList = charCandidateList
+            if self.w.activeTeamNum ==1:
+                self.w.queryResultStorageTeam1['char4CandidateList'] = charCandidateList
+            if self.w.activeTeamNum ==2:
+                self.w.queryResultStorageTeam2['char4CandidateList'] = charCandidateList
+            if self.w.activeTeamNum ==3:
+                self.w.queryResultStorageTeam3['char4CandidateList'] = charCandidateList
             self.w.char4Dropbox.addItems(charDropboxItemList)
         if self.i == 4:
             self.w.char5CandidateList = charCandidateList
+            if self.w.activeTeamNum ==1:
+                self.w.queryResultStorageTeam1['char5CandidateList'] = charCandidateList
+            if self.w.activeTeamNum ==2:
+                self.w.queryResultStorageTeam2['char5CandidateList'] = charCandidateList
+            if self.w.activeTeamNum ==3:
+                self.w.queryResultStorageTeam3['char5CandidateList'] = charCandidateList
             self.w.char5Dropbox.addItems(charDropboxItemList)
+        
 
 class RequestRunnable(QRunnable):
     def __init__(self, url, json, mainGUI, apiKey):
@@ -87,6 +122,15 @@ class RequestRunnable(QRunnable):
         QThread.msleep(1000)
         print(r)
         try:
+            if self.w.activeTeamNum == 1:
+                self.w.queryResultStorageTeam1['rjson'] = r.json()
+                self.w.queryResultStorageTeam1['charDataList'] = self.w.charDataList
+            if self.w.activeTeamNum == 2:
+                self.w.queryResultStorageTeam2['rjson'] = r.json()
+                self.w.queryResultStorageTeam2['charDataList'] = self.w.charDataList
+            if self.w.activeTeamNum == 3:
+                self.w.queryResultStorageTeam3['rjson'] = r.json()
+                self.w.queryResultStorageTeam3['charDataList'] = self.w.charDataList
             if len(r.json()['data']['result']) == 0:
                 self.w.queryStatusTag.setText('无结果！等待查询')
                 self.w.queryStatusTag.setStyleSheet("color:green")
@@ -120,7 +164,6 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
         self.downCount.setObjectName('downCount_%s' % solution['id'])
         self.commentBrowser.setObjectName('commentBrowser_%s' % solution['id'])
         self.renderSolution(solution)
-
     def renderSolution(self, solution):
         __pickImageList = []
         __pixPickImageList = []
@@ -174,6 +217,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
     def __init__(self, parent=None):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
+        self.sceneCharImageList = [QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene()]
         self.recognizeAndSolveButton.clicked.connect(lambda: self.recognizeAndSolve(0))
         self.recognizeAndSolveButton_TeamOneFromHisotry.clicked.connect(lambda: self.recognizeAndSolve(1))
         self.recognizeAndSolveButton_TeamTwoFromHisotry.clicked.connect(lambda: self.recognizeAndSolve(2))
@@ -188,10 +232,18 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.TM_CCORR_NORMED.clicked.connect(self.setTMAlgorithmOnClicked)
         self.TM_SQDIFF.clicked.connect(self.setTMAlgorithmOnClicked)
         self.TM_SQDIFF_NORMED.clicked.connect(self.setTMAlgorithmOnClicked)
+        self.team1RadioButton.clicked.connect(lambda: self.switchActiveTeam(1))
+        self.team2RadioButton.clicked.connect(lambda: self.switchActiveTeam(2))
+        self.team3RadioButton.clicked.connect(lambda: self.switchActiveTeam(3))
         self.apiKeylineEdit.textChanged.connect(self.setApiKey)
         self.region = config.region
         self.algorithm = config.algorithm
         self.apiKey = config.apiKey
+        self.activeTeamNum = 1
+        self.queryResultStorageTeam1 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
+        self.queryResultStorageTeam2 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
+        self.queryResultStorageTeam3 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
+        self.team1RadioButton.setChecked(True)
         if self.region == 1:
             self.setRegion1.setChecked(True)
         if self.region == 2:
@@ -230,7 +282,110 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.handle = 0
         self.queryStatusTag.setText("请选择句柄")
         self.queryStatusTag.setStyleSheet("color:red")
-    
+    def switchActiveTeam(self, targetTeamNum):
+        if self.activeTeamNum == targetTeamNum:
+            return
+        self.char1Dropbox.clear()
+        self.char2Dropbox.clear()
+        self.char3Dropbox.clear()
+        self.char4Dropbox.clear()
+        self.char5Dropbox.clear()
+        self.activeTeamNum = targetTeamNum
+        for i in range(self.solutionListLayout.count()):
+            self.solutionListLayout.itemAt(i).widget().deleteLater()
+        self.sceneCharImageList = [QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene()]
+        for scene in self.sceneCharImageList:
+            scene.clear()
+        targetQueryResultStorageRJson = {}
+        try:
+            char1DropboxItemList = []
+            char2DropboxItemList = []
+            char3DropboxItemList = []
+            char4DropboxItemList = []
+            char5DropboxItemList = []
+            if targetTeamNum == 1:
+                self.charDataList = self.queryResultStorageTeam1['charDataList']
+                self.itemCharImageList = self.queryResultStorageTeam1['itemCharImageList']
+                self.char1CandidateList = self.queryResultStorageTeam1['char1CandidateList']
+                self.char2CandidateList = self.queryResultStorageTeam1['char2CandidateList']
+                self.char3CandidateList = self.queryResultStorageTeam1['char3CandidateList']
+                self.char4CandidateList = self.queryResultStorageTeam1['char4CandidateList']
+                self.char5CandidateList = self.queryResultStorageTeam1['char5CandidateList']
+                targetQueryResultStorageRJson = self.queryResultStorageTeam1['rjson']
+                for j in range(6):
+                    char1DropboxItemList.append(self.queryResultStorageTeam1['char1CandidateList'][j]['name'])
+                    char2DropboxItemList.append(self.queryResultStorageTeam1['char2CandidateList'][j]['name'])
+                    char3DropboxItemList.append(self.queryResultStorageTeam1['char3CandidateList'][j]['name'])
+                    char4DropboxItemList.append(self.queryResultStorageTeam1['char4CandidateList'][j]['name'])
+                    char5DropboxItemList.append(self.queryResultStorageTeam1['char5CandidateList'][j]['name'])
+            if targetTeamNum == 2:
+                self.charDataList = self.queryResultStorageTeam2['charDataList']
+                self.itemCharImageList = self.queryResultStorageTeam2['itemCharImageList']
+                self.char1CandidateList = self.queryResultStorageTeam2['char1CandidateList']
+                self.char2CandidateList = self.queryResultStorageTeam2['char2CandidateList']
+                self.char3CandidateList = self.queryResultStorageTeam2['char3CandidateList']
+                self.char4CandidateList = self.queryResultStorageTeam2['char4CandidateList']
+                self.char5CandidateList = self.queryResultStorageTeam2['char5CandidateList']
+                targetQueryResultStorageRJson = self.queryResultStorageTeam2['rjson']
+                for j in range(6):
+                    char1DropboxItemList.append(self.queryResultStorageTeam2['char1CandidateList'][j]['name'])
+                    char2DropboxItemList.append(self.queryResultStorageTeam2['char2CandidateList'][j]['name'])
+                    char3DropboxItemList.append(self.queryResultStorageTeam2['char3CandidateList'][j]['name'])
+                    char4DropboxItemList.append(self.queryResultStorageTeam2['char4CandidateList'][j]['name'])
+                    char5DropboxItemList.append(self.queryResultStorageTeam2['char5CandidateList'][j]['name'])
+            if targetTeamNum == 3:
+                self.charDataList = self.queryResultStorageTeam3['charDataList']
+                self.itemCharImageList = self.queryResultStorageTeam3['itemCharImageList']
+                self.char1CandidateList = self.queryResultStorageTeam3['char1CandidateList']
+                self.char2CandidateList = self.queryResultStorageTeam3['char2CandidateList']
+                self.char3CandidateList = self.queryResultStorageTeam3['char3CandidateList']
+                self.char4CandidateList = self.queryResultStorageTeam3['char4CandidateList']
+                self.char5CandidateList = self.queryResultStorageTeam3['char5CandidateList']
+                targetQueryResultStorageRJson = self.queryResultStorageTeam3['rjson']
+                for j in range(6):
+                    char1DropboxItemList.append(self.queryResultStorageTeam3['char1CandidateList'][j]['name'])
+                    char2DropboxItemList.append(self.queryResultStorageTeam3['char2CandidateList'][j]['name'])
+                    char3DropboxItemList.append(self.queryResultStorageTeam3['char3CandidateList'][j]['name'])
+                    char4DropboxItemList.append(self.queryResultStorageTeam3['char4CandidateList'][j]['name'])
+                    char5DropboxItemList.append(self.queryResultStorageTeam3['char5CandidateList'][j]['name'])
+            self.showChars(targetTeamNum)
+            self.char1Dropbox.addItem(self.charDataList[0]['name'])
+            self.char2Dropbox.addItem(self.charDataList[1]['name'])
+            self.char3Dropbox.addItem(self.charDataList[2]['name'])
+            self.char4Dropbox.addItem(self.charDataList[3]['name'])
+            self.char5Dropbox.addItem(self.charDataList[4]['name'])
+            self.char1Dropbox.addItems(char1DropboxItemList)
+            self.char2Dropbox.addItems(char2DropboxItemList)
+            self.char3Dropbox.addItems(char3DropboxItemList)
+            self.char4Dropbox.addItems(char4DropboxItemList)
+            self.char5Dropbox.addItems(char5DropboxItemList)
+        except Exception as e:
+            print(e)
+        try:
+            self.char1Avatar.setScene(self.sceneCharImageList[0])
+            self.char2Avatar.setScene(self.sceneCharImageList[1])
+            self.char3Avatar.setScene(self.sceneCharImageList[2])
+            self.char4Avatar.setScene(self.sceneCharImageList[3])
+            self.char5Avatar.setScene(self.sceneCharImageList[4])
+        except Exception as e:
+            print(e)
+        try:
+            if not targetQueryResultStorageRJson:
+                return
+            if targetQueryResultStorageRJson['data']['result'] == 0:
+                self.queryStatusTag.setText('无结果！等待查询')
+                self.queryStatusTag.setStyleSheet("color:green")
+                return
+            for solution in targetQueryResultStorageRJson['data']['result']:
+                QMetaObject.invokeMethod(self, "addSolution",
+                                        Qt.QueuedConnection,
+                                        Q_ARG(dict, solution))
+                self.queryStatusTag.setText('等待查询')
+                self.queryStatusTag.setStyleSheet("color:green")
+        except Exception as e:
+            print(e)
+        
+
     def setApiKey(self, apiKey):
         self.apiKey = apiKey
     def onCharCandidateSelect(self, candidateName, charNum:[1,2,3,4,5]):
@@ -329,31 +484,61 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             translatedCharY = gameImage.height()*config.charLocationRatioConfig_CurrentEnemyTeam['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
             translatedCharH = gameImage.height()*config.charLocationRatioConfig_CurrentEnemyTeam['h']
             translatedCharW = gameImage.width()*config.charLocationRatioConfig_CurrentEnemyTeam['w']
-            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_CurrentEnemyTeam['x'] ] # 裁剪出对方每个角色头像
+            if self.activeTeamNum == 1:
+                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_CurrentEnemyTeam['x'] ]
+            if self.activeTeamNum == 2:
+                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_CurrentEnemyTeam['x'] ]
+            if self.activeTeamNum == 3:
+                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_CurrentEnemyTeam['x'] ]
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_CurrentEnemyTeam['x']] 
         if teamNum==1:
             # 履历一队
             translatedCharY = gameImage.height()*config.charLocationRatioConfig_HistoryTeamOne['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
             translatedCharH = gameImage.height()*config.charLocationRatioConfig_HistoryTeamOne['h']
             translatedCharW = gameImage.width()*config.charLocationRatioConfig_HistoryTeamOne['w']
-            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamOne['x'] ] # 裁剪出对方每个角色头像
+            if self.activeTeamNum == 1:
+                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamOne['x']]
+            if self.activeTeamNum == 2:
+                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamOne['x']]
+            if self.activeTeamNum == 3:
+                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamOne['x']]
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamOne['x']]
         if teamNum==2:
-            # 履历二队
+            #履历二队
             translatedCharY = gameImage.height()*config.charLocationRatioConfig_HistoryTeamTwo['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
             translatedCharH = gameImage.height()*config.charLocationRatioConfig_HistoryTeamTwo['h']
             translatedCharW = gameImage.width()*config.charLocationRatioConfig_HistoryTeamTwo['w']
-            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamTwo['x'] ] # 裁剪出对方每个角色头像
+            if self.activeTeamNum == 1:
+                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamTwo['x']]
+            if self.activeTeamNum == 2:
+                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamTwo['x']]
+            if self.activeTeamNum == 3:
+                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamTwo['x']]
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamTwo['x']]
         if teamNum==3:
-            # 履历三队
+            #履历三队
             translatedCharY = gameImage.height()*config.charLocationRatioConfig_HistoryTeamThree['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
             translatedCharH = gameImage.height()*config.charLocationRatioConfig_HistoryTeamThree['h']
             translatedCharW = gameImage.width()*config.charLocationRatioConfig_HistoryTeamThree['w']
-            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamThree['x'] ] # 裁剪出对方每个角色头像
+            if self.activeTeamNum == 1:
+                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamThree['x']]
+            if self.activeTeamNum == 2:
+                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamThree['x']]
+            if self.activeTeamNum == 3:
+                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamThree['x']]
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamThree['x']]
         if teamNum==-1:
             # 当前防守队
             translatedCharY = gameImage.height()*config.charLocationRatioConfig_OwnTeam['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
             translatedCharH = gameImage.height()*config.charLocationRatioConfig_OwnTeam['h']
             translatedCharW = gameImage.width()*config.charLocationRatioConfig_OwnTeam['w']
-            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_OwnTeam['x'] ] # 裁剪出对方每个角色头像
+            if self.activeTeamNum == 1:
+                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_OwnTeam['x']]
+            if self.activeTeamNum == 2:
+                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_OwnTeam['x']]
+            if self.activeTeamNum == 3:
+                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_OwnTeam['x']]
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_OwnTeam['x']]
         self.charDataList = [
             {'name': '未知角色', 'id': 1000},
             {'name': '未知角色', 'id': 1000},
@@ -361,12 +546,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             {'name': '未知角色', 'id': 1000},
             {'name': '未知角色', 'id': 1000},
         ]
-        self.pixCharImageList = [QtGui.QPixmap.fromImage(charImage) for charImage in self.charImageList]
-        # for i in range(len(self.pixCharImageList)):
-        #     self.pixCharImageList[i].save('%s.png' % i)
-        self.itemCharImageList = [QGraphicsPixmapItem(pix) for pix in self.pixCharImageList]
         # self.sceneCharImageList = [QGraphicsScene().addItem(item) for item in self.itemCharImageList]
-        self.showChars()
+        self.showChars(0)
         self.parseChars()
         raw_id_list = [charData['id'] for charData in self.charDataList]
         id_list = [ x * 100 + 1 for x in raw_id_list ]
@@ -388,14 +569,26 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
     def addSolution(self, solution):
         self.solutionListLayout.addWidget(GUIsolutionWidget(solution=solution))
         self.solutionListScrollAreaScrollAreaWidgetContents.setLayout(self.solutionListLayout)
-    def showChars(self):
+    def showChars(self, targetTeamNum:[0,1,2,3]):
+        if targetTeamNum == 0:
+            self.pixCharImageList = [QtGui.QPixmap.fromImage(charImage) for charImage in self.charImageList]
+            self.itemCharImageList = [QGraphicsPixmapItem(pix) for pix in self.pixCharImageList]
+        if targetTeamNum == 1:
+            self.pixCharImageList = [QtGui.QPixmap.fromImage(charImage) for charImage in self.queryResultStorageTeam1['charImageList']]
+            self.itemCharImageList = [QGraphicsPixmapItem(pix) for pix in self.pixCharImageList]
+        if targetTeamNum == 2:
+            self.pixCharImageList = [QtGui.QPixmap.fromImage(charImage) for charImage in self.queryResultStorageTeam2['charImageList']]
+            self.itemCharImageList = [QGraphicsPixmapItem(pix) for pix in self.pixCharImageList]
+        if targetTeamNum == 3:
+            self.pixCharImageList = [QtGui.QPixmap.fromImage(charImage) for charImage in self.queryResultStorageTeam3['charImageList']]
+            self.itemCharImageList = [QGraphicsPixmapItem(pix) for pix in self.pixCharImageList]
         for i in range(len(self.sceneCharImageList)):
             self.sceneCharImageList[i].addItem(self.itemCharImageList[i])
         self.char1Avatar.setScene(self.sceneCharImageList[0])
         self.char2Avatar.setScene(self.sceneCharImageList[1])
         self.char3Avatar.setScene(self.sceneCharImageList[2])
         self.char4Avatar.setScene(self.sceneCharImageList[3])
-        self.char5Avatar.setScene(self.sceneCharImageList[4])        
+        self.char5Avatar.setScene(self.sceneCharImageList[4])
     def parseChars(self):
         if getattr(sys, 'frozen', False):
             base_path = sys._MEIPASS

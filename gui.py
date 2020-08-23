@@ -198,6 +198,12 @@ class Ui_PCRJJCAnalyzerGUI(object):
         self.char5Dropbox = QtWidgets.QComboBox(PCRJJCAnalyzerGUI)
         self.char5Dropbox.setGeometry(QtCore.QRect(130, 530, 81, 22))
         self.char5Dropbox.setObjectName("char5Dropbox")
+        self.resetExclusionCurrentTeamButton = QtWidgets.QPushButton(PCRJJCAnalyzerGUI)
+        self.resetExclusionCurrentTeamButton.setGeometry(QtCore.QRect(520, 40, 91, 23))
+        self.resetExclusionCurrentTeamButton.setObjectName("resetExclusionCurrentTeamButton")
+        self.resetExclusionAllTeamButton = QtWidgets.QPushButton(PCRJJCAnalyzerGUI)
+        self.resetExclusionAllTeamButton.setGeometry(QtCore.QRect(620, 40, 91, 23))
+        self.resetExclusionAllTeamButton.setObjectName("resetExclusionAllTeamButton")
 
         self.retranslateUi(PCRJJCAnalyzerGUI)
         QtCore.QMetaObject.connectSlotsByName(PCRJJCAnalyzerGUI)
@@ -233,3 +239,5 @@ class Ui_PCRJJCAnalyzerGUI(object):
         self.recognizeAndSolveButton_TeamThreeFromHisotry.setText(_translate("PCRJJCAnalyzerGUI", "履历解第三队"))
         self.recognizeAndSolveButton_OwnTeam.setText(_translate("PCRJJCAnalyzerGUI", "查防守阵容"))
         self.recognizeAndSolveButton_TeamOneFromHisotry.setText(_translate("PCRJJCAnalyzerGUI", "履历解第一队"))
+        self.resetExclusionCurrentTeamButton.setText(_translate("PCRJJCAnalyzerGUI", "重置本组锁定"))
+        self.resetExclusionAllTeamButton.setText(_translate("PCRJJCAnalyzerGUI", "重置全部锁定"))

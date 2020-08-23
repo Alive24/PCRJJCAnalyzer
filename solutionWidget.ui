@@ -81,9 +81,9 @@
      </size>
     </property>
    </widget>
-   <widget class="QPushButton" name="lockSolutionButton">
+   <widget class="QCheckBox" name="lockSolutionCheckBox">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>

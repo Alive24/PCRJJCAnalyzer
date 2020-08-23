@@ -15,7 +15,7 @@ import requests
 import win32gui
 import asyncio
 import quamash
-from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QLabel, QWidget, QTextBrowser, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QLabel, QWidget, QTextBrowser, QMessageBox, QButtonGroup, QCheckBox
 from PyQt5 import QtGui, QtCore, QtNetwork
 from PyQt5.QtCore import QRunnable, QThreadPool, pyqtSlot, QThread, QMetaObject, Qt, Q_ARG
 from gui import Ui_PCRJJCAnalyzerGUI
@@ -147,9 +147,10 @@ class RequestRunnable(QRunnable):
             return
 
 class GUIsolutionWidget(QWidget, Ui_solutionWidget):
-    def __init__(self, parent=None, solution=None):
+    def __init__(self, parent=None, solution=None, mainGUI=None, buttonGroup=None):
         super(GUIsolutionWidget, self).__init__(parent)
         self.setupUi(self)
+        self.teamNum = mainGUI.activeTeamNum
         self.pick1Avatar.setObjectName('pick1Avatar_%s' % solution['id'])
         self.pick2Avatar.setObjectName('pick2Avatar_%s' % solution['id'])
         self.pick3Avatar.setObjectName('pick3Avatar_%s' % solution['id'])
@@ -163,13 +164,18 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
         self.upCount.setObjectName('upCount_%s' % solution['id'])
         self.downCount.setObjectName('downCount_%s' % solution['id'])
         self.commentBrowser.setObjectName('commentBrowser_%s' % solution['id'])
-        self.renderSolution(solution)
-    def renderSolution(self, solution):
+        self.lockSolutionCheckBox.stateChanged.connect(lambda: mainGUI.addToExclusionList(self, self.lockSolutionCheckBox, solution, self.teamNum))
+        self.lockSolutionCheckBox.setObjectName('lockSolutionCheckBox_%s' % solution['id'])
+        buttonGroup.addButton(self.lockSolutionCheckBox)
+        self.renderSolution(solution, mainGUI, buttonGroup)
+    def renderSolution(self, solution, mainGUI, buttonGroup):
         __pickImageList = []
         __pixPickImageList = []
         __itemPickImageList = []
         __scenePickImageList = [QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene()]
         __scenePickStarList = [QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene()]
+        if solution['id'] == mainGUI.excludingSolutionIDList[self.teamNum-1]:
+            self.findChild(QCheckBox, 'lockSolutionCheckBox_%s' % solution['id']).setChecked(True)
         for i in range(5):
             if solution["atk"][i]['star'] == 1:
                 __scenePickStarList[i].addText("一星")
@@ -189,6 +195,12 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
         __itemPickImageList = [QGraphicsPixmapItem(pix) for pix in __pixPickImageList]
         for i in range(len(__scenePickImageList)):
             __scenePickImageList[i].addItem(__itemPickImageList[i])
+            for j in range(4):
+                if self.teamNum == j:
+                    continue
+                for k in range(5):
+                    if solution["atk"][i]['id'] == mainGUI.exclusionList[j][k]:
+                        __scenePickImageList[i].setBackgroundBrush(QtGui.QBrush(Qt.red))
         try:
             self.findChild(QGraphicsView, 'pick1Avatar_%s' % solution['id']).setScene(__scenePickImageList[0])
             self.findChild(QGraphicsView, 'pick2Avatar_%s' % solution['id']).setScene(__scenePickImageList[1])
@@ -217,6 +229,11 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
     def __init__(self, parent=None):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
+        self.exclusionList  = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+        self.excludingSolutionIDList = ['','','']
+        self.exclusionCheckBoxButtonGroup = QButtonGroup()
+        self.resetExclusionCurrentTeamButton.clicked.connect(lambda: self.resetExclusionList(self.activeTeamNum))
+        self.resetExclusionAllTeamButton.clicked.connect(lambda: self.resetExclusionList(-1))
         self.sceneCharImageList = [QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene()]
         self.recognizeAndSolveButton.clicked.connect(lambda: self.recognizeAndSolve(0))
         self.recognizeAndSolveButton_TeamOneFromHisotry.clicked.connect(lambda: self.recognizeAndSolve(1))
@@ -282,14 +299,30 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.handle = 0
         self.queryStatusTag.setText("请选择句柄")
         self.queryStatusTag.setStyleSheet("color:red")
-    def switchActiveTeam(self, targetTeamNum):
-        if self.activeTeamNum == targetTeamNum:
-            return
-        self.char1Dropbox.clear()
-        self.char2Dropbox.clear()
-        self.char3Dropbox.clear()
-        self.char4Dropbox.clear()
-        self.char5Dropbox.clear()
+    def resetExclusionList(self, teamNumToReset:[-1, 0, 1, 2, 3]):
+        if teamNumToReset == -1:
+            self.exclusionList  = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+            self.excludingSolutionIDList = ['','','']
+        if teamNumToReset in [1, 2, 3]:
+            self.exclusionList[teamNumToReset] = [0, 0, 0, 0, 0]
+            self.excludingSolutionIDList[teamNumToReset-1] = ''
+        self.switchActiveTeam(targetTeamNum=self.activeTeamNum, forced=True)
+    def addToExclusionList(self, GUIsolutionWidget, lockSolutionCheckBox, solution, ExcludedByTeamNum:[0,1,2,3]):
+        if lockSolutionCheckBox.isChecked():
+            self.excludingSolutionIDList[ExcludedByTeamNum-1] = solution['id']
+            for i in range(5):
+                self.exclusionList[GUIsolutionWidget.teamNum][i] = solution['atk'][i]['id']
+        
+    def switchActiveTeam(self, targetTeamNum, forced:bool = False):
+        if not forced:
+            if self.activeTeamNum == targetTeamNum:
+                return
+            self.char1Dropbox.clear()
+            self.char2Dropbox.clear()
+            self.char3Dropbox.clear()
+            self.char4Dropbox.clear()
+            self.char5Dropbox.clear()
+        self.exclusionCheckBoxButtonGroup = QButtonGroup()
         self.activeTeamNum = targetTeamNum
         for i in range(self.solutionListLayout.count()):
             self.solutionListLayout.itemAt(i).widget().deleteLater()
@@ -458,6 +491,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             if clickedRadioButton.objectName() == "setRegion3":
                 self.region = 3
     def recognizeAndSolve(self, teamNum:[0, 1, 2, 3, 4]):
+        self.exclusionCheckBoxButtonGroup = QButtonGroup()
         self.char1Dropbox.clear()
         self.char2Dropbox.clear()
         self.char3Dropbox.clear()
@@ -567,7 +601,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             QThreadPool.globalInstance().start(completeDropboxRunnable)
     @pyqtSlot(dict)
     def addSolution(self, solution):
-        self.solutionListLayout.addWidget(GUIsolutionWidget(solution=solution))
+        self.solutionListLayout.addWidget(GUIsolutionWidget(solution=solution, mainGUI=self, buttonGroup=self.exclusionCheckBoxButtonGroup))
         self.solutionListScrollAreaScrollAreaWidgetContents.setLayout(self.solutionListLayout)
     def showChars(self, targetTeamNum:[0,1,2,3]):
         if targetTeamNum == 0:

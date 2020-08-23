@@ -39,10 +39,10 @@ class Ui_solutionWidget(object):
         self.commentBrowser.setGeometry(QtCore.QRect(0, 120, 441, 111))
         self.commentBrowser.setMinimumSize(QtCore.QSize(0, 111))
         self.commentBrowser.setObjectName("commentBrowser")
-        self.lockSolutionButton = QtWidgets.QPushButton(self.solution)
-        self.lockSolutionButton.setEnabled(False)
-        self.lockSolutionButton.setGeometry(QtCore.QRect(450, 90, 88, 23))
-        self.lockSolutionButton.setObjectName("lockSolutionButton")
+        self.lockSolutionCheckBox = QtWidgets.QCheckBox(self.solution)
+        self.lockSolutionCheckBox.setEnabled(True)
+        self.lockSolutionCheckBox.setGeometry(QtCore.QRect(450, 90, 88, 23))
+        self.lockSolutionCheckBox.setObjectName("lockSolutionCheckBox")
         self.pick4Star = QtWidgets.QGraphicsView(self.solution)
         self.pick4Star.setGeometry(QtCore.QRect(270, 90, 81, 21))
         self.pick4Star.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
@@ -107,7 +107,7 @@ class Ui_solutionWidget(object):
     def retranslateUi(self, solutionWidget):
         _translate = QtCore.QCoreApplication.translate
         solutionWidget.setWindowTitle(_translate("solutionWidget", "Form"))
-        self.lockSolutionButton.setText(_translate("solutionWidget", "锁定此阵容"))
+        self.lockSolutionCheckBox.setText(_translate("solutionWidget", "锁定此阵容"))
         self.dislikeLabel.setText(_translate("solutionWidget", "踩"))
         self.likeLabel.setText(_translate("solutionWidget", "赞"))
         self.upCount.setText(_translate("solutionWidget", "<html><head/><body><p><span style=\" color:#009309;\">赞数</span></p></body></html>"))

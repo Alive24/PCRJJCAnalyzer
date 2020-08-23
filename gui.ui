@@ -666,12 +666,38 @@
     </rect>
    </property>
   </widget>
+  <widget class="QPushButton" name="resetExclusionCurrentTeamButton">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>40</y>
+     <width>91</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>重置本组锁定</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="resetExclusionAllTeamButton">
+   <property name="geometry">
+    <rect>
+     <x>620</x>
+     <y>40</y>
+     <width>91</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>重置全部锁定</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="algorithmButtonGroup"/>
   <buttongroup name="regionButtonGroup"/>
+  <buttongroup name="algorithmButtonGroup"/>
   <buttongroup name="activeTeamNumButtonGroup"/>
  </buttongroups>
 </ui>

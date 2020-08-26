@@ -13,73 +13,6 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QRadioButton" name="radioButton">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>110</x>
-     <y>10</y>
-     <width>89</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>竞技场</string>
-   </property>
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QRadioButton" name="radioButton_2">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>180</x>
-     <y>10</y>
-     <width>89</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>公主竞技场</string>
-   </property>
-  </widget>
-  <widget class="QRadioButton" name="radioButton_3">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>270</x>
-     <y>10</y>
-     <width>89</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>自动</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>10</y>
-     <width>81</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>当前工作模式</string>
-   </property>
-  </widget>
   <widget class="QRadioButton" name="team3RadioButton">
    <property name="enabled">
     <bool>true</bool>
@@ -87,9 +20,9 @@
    <property name="geometry">
     <rect>
      <x>640</x>
-     <y>70</y>
+     <y>50</y>
      <width>61</width>
-     <height>16</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -106,9 +39,9 @@
    <property name="geometry">
     <rect>
      <x>580</x>
-     <y>70</y>
+     <y>55</y>
      <width>61</width>
-     <height>16</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="text">
@@ -125,9 +58,9 @@
    <property name="geometry">
     <rect>
      <x>520</x>
-     <y>70</y>
+     <y>55</y>
      <width>61</width>
-     <height>16</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="text">
@@ -144,9 +77,9 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>30</y>
+     <y>10</y>
      <width>91</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -156,10 +89,10 @@
   <widget class="QLabel" name="regionSelector">
    <property name="geometry">
     <rect>
-     <x>440</x>
+     <x>220</x>
      <y>10</y>
      <width>81</width>
-     <height>16</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -169,10 +102,10 @@
   <widget class="QRadioButton" name="setRegion3">
    <property name="geometry">
     <rect>
-     <x>680</x>
+     <x>410</x>
      <y>10</y>
-     <width>89</width>
-     <height>16</height>
+     <width>51</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -185,10 +118,10 @@
   <widget class="QRadioButton" name="setRegion2">
    <property name="geometry">
     <rect>
-     <x>610</x>
+     <x>350</x>
      <y>10</y>
-     <width>89</width>
-     <height>16</height>
+     <width>61</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -201,10 +134,10 @@
   <widget class="QRadioButton" name="setRegion1">
    <property name="geometry">
     <rect>
-     <x>540</x>
+     <x>290</x>
      <y>10</y>
-     <width>89</width>
-     <height>16</height>
+     <width>61</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -368,9 +301,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>60</y>
+     <y>50</y>
      <width>91</width>
-     <height>23</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -384,9 +317,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>30</y>
+     <y>10</y>
      <width>91</width>
-     <height>23</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -552,9 +485,9 @@
    <property name="geometry">
     <rect>
      <x>700</x>
-     <y>70</y>
+     <y>50</y>
      <width>111</width>
-     <height>20</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -568,9 +501,9 @@
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>60</y>
+     <y>50</y>
      <width>91</width>
-     <height>23</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -581,9 +514,9 @@
    <property name="geometry">
     <rect>
      <x>320</x>
-     <y>60</y>
+     <y>50</y>
      <width>91</width>
-     <height>23</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -594,9 +527,9 @@
    <property name="geometry">
     <rect>
      <x>420</x>
-     <y>60</y>
+     <y>50</y>
      <width>91</width>
-     <height>23</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -607,9 +540,9 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>60</y>
+     <y>50</y>
      <width>91</width>
-     <height>23</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -670,34 +603,47 @@
    <property name="geometry">
     <rect>
      <x>520</x>
-     <y>40</y>
+     <y>10</y>
      <width>91</width>
-     <height>23</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>重置本组锁定</string>
+    <string>重置本队锁定</string>
    </property>
   </widget>
   <widget class="QPushButton" name="resetExclusionAllTeamButton">
    <property name="geometry">
     <rect>
      <x>620</x>
-     <y>40</y>
+     <y>10</y>
      <width>91</width>
-     <height>23</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
     <string>重置全部锁定</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="resetAllButton">
+   <property name="geometry">
+    <rect>
+     <x>720</x>
+     <y>10</y>
+     <width>91</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>全部重置</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="regionButtonGroup"/>
   <buttongroup name="algorithmButtonGroup"/>
+  <buttongroup name="regionButtonGroup"/>
   <buttongroup name="activeTeamNumButtonGroup"/>
  </buttongroups>
 </ui>

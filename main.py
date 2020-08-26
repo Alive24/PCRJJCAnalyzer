@@ -229,6 +229,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
     def __init__(self, parent=None):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
+        self.setWindowTitle('PCRJJCAnalyzer-v0.0.7-beta1')
         self.exclusionList  = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         self.excludingSolutionIDList = ['','','']
         self.exclusionCheckBoxButtonGroup = QButtonGroup()
@@ -240,6 +241,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.recognizeAndSolveButton_TeamTwoFromHisotry.clicked.connect(lambda: self.recognizeAndSolve(2))
         self.recognizeAndSolveButton_TeamThreeFromHisotry.clicked.connect(lambda: self.recognizeAndSolve(3))
         self.recognizeAndSolveButton_OwnTeam.clicked.connect(lambda: self.recognizeAndSolve(-1))
+        self.resetAllButton.clicked.connect(self.resetAll)
         self.setRegion1.clicked.connect(self.setRegionOnClicked)
         self.setRegion2.clicked.connect(self.setRegionOnClicked)
         self.setRegion3.clicked.connect(self.setRegionOnClicked)
@@ -299,6 +301,20 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.handle = 0
         self.queryStatusTag.setText("请选择句柄")
         self.queryStatusTag.setStyleSheet("color:red")
+    def resetAll(self):
+        self.activeTeamNum = 1
+        self.team1RadioButton.setChecked(True)
+        self.queryResultStorageTeam1 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
+        self.queryResultStorageTeam2 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
+        self.queryResultStorageTeam3 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
+        self.exclusionList  = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+        self.excludingSolutionIDList = ['','','']
+        self.char1Dropbox.clear()
+        self.char2Dropbox.clear()
+        self.char3Dropbox.clear()
+        self.char4Dropbox.clear()
+        self.char5Dropbox.clear()
+        self.switchActiveTeam(targetTeamNum=self.activeTeamNum, forced=True)
     def resetExclusionList(self, teamNumToReset:[-1, 0, 1, 2, 3]):
         if teamNumToReset == -1:
             self.exclusionList  = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]

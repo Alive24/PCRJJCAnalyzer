@@ -20,10 +20,12 @@
 0. 程序可在Release中下载。另有onefile单文件版本，但启动速度会稍慢一些。
 1. 启动后请在程序右下方填入你的apiKey（在作业网[公主连结Re: Dive Fan Club - Bot](https://www.pcrdfans.com/bot)处申请，请确认你当前ip与作业网中登记的是相同的，否则请重置ip）
 2. 请根据标题在程序左下方选择你运行PCR的模拟器句柄。
-3. 游戏中进入对战阵容选择画面后（目前需要人工确认），点击识别求解按钮。
+3. 游戏中进入对战阵容选择画面后（目前需要人工确认），点击识别求解按钮直接查询作业。
 4. 在对战履历界面，可以点击履历解第一队、履历解第二队和履历解第三队按钮查询相应的作业。
-5. 在队伍编程页面，可以点击查防守阵容按钮查询相应的作业。
-
+5. 在队伍编成页面，可以点击查防守阵容按钮查询相应的作业。
+6. 识别查询时，会默认使用当前设定的算法给出的答案。目前每次查询都会分别使用六个算法进行识别。如果某个角色有识别错误，可以单独点击识别错误的角色的名字所在的复选框选择其他备选结果。
+7. 可以通过点击第一队、第二队、第三队按钮切换不同的查询，且每个队伍会分别记录最后一次查询。
+8. 可以通过点击单个作业旁的锁定此队伍按钮来锁定该作业。锁定后在其他队伍查询的结果中冲突的角色将会被标红（具体效果请观看演示视频4中打PJJC的示范）
 
 ## 编译方法
 1. 创建适合的python环境（开发环境下为conda建立的python3.7虚拟环境）
@@ -40,6 +42,7 @@
 - [PCRJJCAnalyzer - 基本用法展示 1](https://www.bilibili.com/video/bv1kk4y1175r)
 - [PCRJJCAnalyzer - 基本用法展示 2 (PJJC)](https://www.bilibili.com/video/bv1K5411h783)
 - [PCRJJCAnalyzer - 基本用法展示 3 (防守阵容自查)](https://www.bilibili.com/video/bv1FK411M7Wn)
+- [PCRJJCAnalyzer - 基本用法展示 4 (v0.0.6版 2020-08-24) (PJJC三队记录及锁定阵容功能)](https://www.bilibili.com/video/BV1KK411M7G4)
 
 ![sample3](https://github.com/xct24/PCRJJCAnalyzer/blob/master/doc/img/sample3.png?raw=true)
 

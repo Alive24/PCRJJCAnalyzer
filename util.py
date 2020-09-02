@@ -1,4 +1,5 @@
 import cv2
+import json
 import numpy as np
 import win32gui
 import os
@@ -93,3 +94,87 @@ def query_getPickAvatar(id:int) -> QImage:
     pickAvatar = QImage(refImagePath).copy(pickX, pickY, pickW, pickH)
     return pickAvatar
 
+def config_loadConfig():
+    try:
+        config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'r',encoding='utf-8')
+        config_dict = json.load(config_file)
+        config_file.close()
+    except Exception as e:
+        print(e)
+        config_dict = {
+            'apiKey': '',
+            'region': 1,
+        }
+        config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'w',encoding='utf-8')
+        json.dump(config_dict,config_file,ensure_ascii=False)
+        config_file.close()
+    return config_dict
+
+def config_writeConfig(config_dict):
+    try:
+        config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'w',encoding='utf-8')
+        json.dump(config_dict,config_file,ensure_ascii=False)
+        config_file.close()
+    except Exception as e:
+        print(e)
+        config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'w',encoding='utf-8')
+        json.dump(config_dict,config_file,ensure_ascii=False)
+        config_file.close()
+    return
+
+def solution_loadLists():
+    try:
+        bookmarkList_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "bookmarkList.json"),'r',encoding='utf-8')
+        bookmarkList = json.load(bookmarkList_file)
+        bookmarkList_file.close()
+    except Exception as e:
+        print(e)
+        bookmarkList = []
+        bookmarkList_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "bookmarkList.json"),'w',encoding='utf-8')
+        json.dump(bookmarkList,bookmarkList_file,ensure_ascii=False)
+        bookmarkList_file.close()
+    try:
+        ruleOutList_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "ruleOutList.json"),'r',encoding='utf-8')
+        ruleOutList = json.load(ruleOutList_file)
+        ruleOutList_file.close()
+    except Exception as e:
+        print(e)
+        ruleOutList = []
+        ruleOutList_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "ruleOutList.json"),'w',encoding='utf-8')
+        json.dump(ruleOutList,ruleOutList_file,ensure_ascii=False)
+        ruleOutList_file.close()
+    return [bookmarkList, ruleOutList]
+
+def solution_appendToBookmarkList(solution, mainGUI):
+    mainGUI.bookmarkList.append(solution)
+    bookmarkList_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "bookmarkList.json"),'w',encoding='utf-8')
+    json.dump(mainGUI.bookmarkList, bookmarkList_file, ensure_ascii=False)
+    bookmarkList_file.close()
+    return
+
+def solution_appendToRuleOutList(solution, mainGUI):
+    mainGUI.ruleOutList.append(solution)
+    ruleOutList_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "ruleOutList.json"),'w',encoding='utf-8')
+    json.dump(mainGUI.ruleOutList, ruleOutList_file, ensure_ascii=False)
+    ruleOutList_file.close()
+    return
+
+def solution_removeFromBookmarkList(solution, mainGUI):
+    for i in range(len(mainGUI.bookmarkList)):
+        if mainGUI.bookmarkList[i]['id'] == solution['id']:
+            mainGUI.bookmarkList.pop(i)
+            break
+    bookmarkList_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "bookmarkList.json"),'w',encoding='utf-8')
+    json.dump(mainGUI.bookmarkList, bookmarkList_file, ensure_ascii=False)
+    bookmarkList_file.close()
+    return
+
+def solution_removeFromRuleOutList(solution, mainGUI):
+    for i in range(len(mainGUI.ruleOutList)):
+        if mainGUI.ruleOutList[i]['id'] == solution['id']:
+            mainGUI.ruleOutList.pop(i)
+            break
+    ruleOutList_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "ruleOutList.json"),'w',encoding='utf-8')
+    json.dump(mainGUI.ruleOutList, ruleOutList_file, ensure_ascii=False)
+    ruleOutList_file.close()
+    return

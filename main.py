@@ -118,7 +118,7 @@ class RequestRunnable(QRunnable):
             'authorization': self.wApiKey,
             'Content-Type': 'application/json'
         }
-        r = requests.post(self.mUrl, json=self.mJson, headers=headers)
+        r = requests.post(self.mUrl, json=self.mJson, headers=headers) or None
         QThread.msleep(1000)
         print(r)
         try:
@@ -142,8 +142,12 @@ class RequestRunnable(QRunnable):
             self.w.queryStatusTag.setText('等待查询')
             self.w.queryStatusTag.setStyleSheet("color:green")
         except Exception as e:
-            self.w.queryStatusTag.setText('查询失败(%s)' % r.json()['code'])
-            self.w.queryStatusTag.setStyleSheet("color:red")
+            try:
+                self.w.queryStatusTag.setText('查询失败(%s)' % r.json()['code'])
+                self.w.queryStatusTag.setStyleSheet("color:red")
+            except:
+                self.w.queryStatusTag.setText('查询失败(%s)' % "N/A")
+                self.w.queryStatusTag.setStyleSheet("color:red")
             return
 
 class GUIsolutionWidget(QWidget, Ui_solutionWidget):
@@ -163,11 +167,45 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
         self.pick5Star.setObjectName('pick5Star_%s' % solution['id'])
         self.upCount.setObjectName('upCount_%s' % solution['id'])
         self.downCount.setObjectName('downCount_%s' % solution['id'])
+        self.likeDislikeRatioValue.setObjectName('likeDislikeRatioValue_%s' % solution['id'])
         self.commentBrowser.setObjectName('commentBrowser_%s' % solution['id'])
         self.lockSolutionCheckBox.stateChanged.connect(lambda: mainGUI.addToExclusionList(self, self.lockSolutionCheckBox, solution, self.teamNum))
         self.lockSolutionCheckBox.setObjectName('lockSolutionCheckBox_%s' % solution['id'])
+        if self.getIsInBookmarkList(solution, mainGUI):
+            self.bookmarkSolutionCheckBox.setChecked(True)
+            self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+            self.setStyleSheet('background-color: aquamarine')
+        self.bookmarkSolutionCheckBox.stateChanged.connect(lambda: self.bookmarkSolutionCheckBoxHandler(self.bookmarkSolutionCheckBox, solution, mainGUI))
+        self.bookmarkSolutionCheckBox.setObjectName('bookmarkSolutionCheckBox_%s' % solution['id'])
+        if self.getIsInRuleOutList(solution, mainGUI):
+            self.ruleOutSolutionCheckBox.setChecked(True)
+            self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+            self.setStyleSheet('background-color: pink')
+        self.ruleOutSolutionCheckBox.stateChanged.connect(lambda: self.ruleOutSolutionCheckBoxHandler(self.ruleOutSolutionCheckBox, solution, mainGUI))
+        self.ruleOutSolutionCheckBox.setObjectName('ruleOutSolutionCheckBox_%s' % solution['id'])
         buttonGroup.addButton(self.lockSolutionCheckBox)
         self.renderSolution(solution, mainGUI, buttonGroup)
+    def getIsInBookmarkList(self, solution, mainGUI):
+        for bookmarkedSolution in mainGUI.bookmarkList:
+            if solution['id'] == bookmarkedSolution['id']:
+                return True
+        return False
+    def getIsInRuleOutList(self, solution, mainGUI):
+        for ruledOutSolution in mainGUI.ruleOutList:
+            if solution['id'] == ruledOutSolution['id']:
+                return True
+        return False
+
+    def bookmarkSolutionCheckBoxHandler(self, bookmarkSolutionCheckBox, solution, mainGUI):
+        if bookmarkSolutionCheckBox.isChecked():
+            util.solution_appendToBookmarkList(solution, mainGUI)
+        else:
+            util.solution_removeFromBookmarkList(solution, mainGUI)
+    def ruleOutSolutionCheckBoxHandler(self, ruleOutSolutionCheckBox, solution, mainGUI):
+        if ruleOutSolutionCheckBox.isChecked():
+            util.solution_appendToRuleOutList(solution, mainGUI)
+        else:
+            util.solution_removeFromRuleOutList(solution, mainGUI)
     def renderSolution(self, solution, mainGUI, buttonGroup):
         __pickImageList = []
         __pixPickImageList = []
@@ -216,6 +254,11 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
             self.findChild(QLabel, 'upCount_%s' % solution['id']).setStyleSheet("color:green")
             self.findChild(QLabel, 'downCount_%s' % solution['id']).setText(str(solution['down']))
             self.findChild(QLabel, 'downCount_%s' % solution['id']).setStyleSheet("color:red")
+            if solution['down'] != 0:
+                __likeDislikeRatioValue_Text = str(solution['up']/solution['down'])[:4]
+            else:
+                __likeDislikeRatioValue_Text = "N/A"
+            self.findChild(QLabel, 'likeDislikeRatioValue_%s' % solution['id']).setText(__likeDislikeRatioValue_Text)
             for comment in list(reversed(solution['comment'])):
                 self.findChild(QTextBrowser, 'commentBrowser_%s' % solution['id']).append("(%s) %s" % (comment['date'][:10], comment['msg'])) 
         except Exception as e:
@@ -257,12 +300,15 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.apiKeylineEdit.textChanged.connect(self.setApiKey)
         self.region = config.region
         self.algorithm = config.algorithm
-        self.apiKey = config.apiKey
+        self.apiKey = config_dict['apiKey']
+        self.apiKeylineEdit.setText(self.apiKey)
         self.activeTeamNum = 1
         self.queryResultStorageTeam1 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
         self.queryResultStorageTeam2 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
         self.queryResultStorageTeam3 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
         self.team1RadioButton.setChecked(True)
+        self.bookmarkList = util.solution_loadLists()[0]
+        self.ruleOutList = util.solution_loadLists()[1]
         if self.region == 1:
             self.setRegion1.setChecked(True)
         if self.region == 2:
@@ -437,6 +483,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
 
     def setApiKey(self, apiKey):
         self.apiKey = apiKey
+        config_dict['apiKey'] = apiKey
+        util.config_writeConfig(config_dict)
     def onCharCandidateSelect(self, candidateName, charNum:[1,2,3,4,5]):
         if charNum == 1:
             for i in range(6):
@@ -663,6 +711,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
 
 if __name__ == '__main__':
     # ### CLI测试部分
+    config_dict = util.config_loadConfig()
     app = QApplication(sys.argv)
     screen = app.primaryScreen()
     loop = quamash.QEventLoop(app)

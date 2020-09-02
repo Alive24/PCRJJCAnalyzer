@@ -45,7 +45,7 @@
 - [PCRJJCAnalyzer - 基本用法展示 3 (防守阵容自查)](https://www.bilibili.com/video/bv1FK411M7Wn)
 - [PCRJJCAnalyzer - 基本用法展示 4 (v0.0.6版 2020-08-24) (PJJC三队记录及锁定阵容功能)](https://www.bilibili.com/video/BV1KK411M7G4)
 - [PCRJJCAnalyzer - 基本用法展示 5 (v0.1.0版 2020-09-02) (作业收藏和排除功能)](https://www.bilibili.com/video/BV1Rh41197KD/)
-![sample3](https://github.com/xct24/PCRJJCAnalyzer/blob/master/doc/img/sample3.png?raw=true)
+![sample4](https://github.com/xct24/PCRJJCAnalyzer/blob/master/doc/img/sample4.png?raw=true)
 
 ### 开发计划
 1. 基于PyQt5的图形界面 

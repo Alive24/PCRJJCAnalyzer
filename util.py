@@ -96,7 +96,7 @@ def query_getPickAvatar(id:int) -> QImage:
 
 def config_loadConfig():
     if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer")):
-        os.makedirs(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer").decode('utf-8')) 
+        os.makedirs(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer"))
     try:
         config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'r',encoding='utf-8')
         config_dict = json.load(config_file)

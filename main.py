@@ -15,13 +15,81 @@ import requests
 import win32gui
 import asyncio
 import quamash
-from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QLabel, QWidget, QTextBrowser, QMessageBox, QButtonGroup, QCheckBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QLabel, QWidget, QTextBrowser, QMessageBox, QButtonGroup, QCheckBox, QDialog
 from PyQt5 import QtGui, QtCore, QtNetwork
 from PyQt5.QtCore import QRunnable, QThreadPool, pyqtSlot, QThread, QMetaObject, Qt, Q_ARG
 from gui import Ui_PCRJJCAnalyzerGUI
 from solutionWidget import Ui_solutionWidget
+from configDialog import Ui_configDialog
 
-
+class GUIConfigDialogWidget(QDialog, Ui_configDialog):
+    def __init__(self, parent=None, mainGUI=None):
+        super(GUIConfigDialogWidget, self).__init__(parent)
+        self.setupUi(self)
+        self.closeConfigDialogButton.clicked.connect(self.closeConfigDialog)
+        self.marginOffsetPresetComboBoxList = ['自定义', '雷电模拟器', 'MuMu模拟器', 'DMM官方工具', ]
+        self.marginOffsetPresetComboBox.addItems(self.marginOffsetPresetComboBoxList)
+        self.marginOffsetPresetComboBox.setCurrentIndex(0)
+        if config_dict['marginOffsetMode'] == '雷电模拟器':
+            self.marginOffsetPresetComboBox.setCurrentIndex(1)
+        if config_dict['marginOffsetMode'] == 'MuMu模拟器':
+            self.marginOffsetPresetComboBox.setCurrentIndex(2)
+        if config_dict['marginOffsetMode'] == 'DMM官方工具':
+            self.marginOffsetPresetComboBox.setCurrentIndex(3)
+        self.marginOffsetSpinBoxLeft.setRange(-100, 100)
+        self.marginOffsetSpinBoxLeft.setValue(config_dict['effectiveMarginOffSet'][0])
+        self.marginOffsetSpinBoxTop.setRange(-100, 100)
+        self.marginOffsetSpinBoxTop.setValue(config_dict['effectiveMarginOffSet'][1])
+        self.marginOffsetSpinBoxRight.setRange(-100, 100)
+        self.marginOffsetSpinBoxRight.setValue(config_dict['effectiveMarginOffSet'][2])
+        self.marginOffsetSpinBoxBottom.setRange(-100, 100)
+        self.marginOffsetSpinBoxBottom.setValue(config_dict['effectiveMarginOffSet'][3])
+        self.testScreenshotButton.clicked.connect(lambda: self.takeTestScreenshot(mainGUI))
+        self.marginOffsetSpinBoxLeft.valueChanged.connect(lambda targetValue: self.setCustomizedMarginOffset(0, mainGUI, targetValue,))
+        self.marginOffsetSpinBoxTop.valueChanged.connect(lambda targetValue: self.setCustomizedMarginOffset(1, mainGUI, targetValue))
+        self.marginOffsetSpinBoxRight.valueChanged.connect(lambda targetValue: self.setCustomizedMarginOffset(2, mainGUI, targetValue))
+        self.marginOffsetSpinBoxBottom.valueChanged.connect(lambda targetValue: self.setCustomizedMarginOffset(3, mainGUI, targetValue))
+        self.marginOffsetPresetComboBox.activated[str].connect(lambda presetName: self.setToPresetMarginOffset(presetName))
+    
+    def takeTestScreenshot(self, mainGUI):
+        screenshot = screen.grabWindow(mainGUI.handle).toImage()
+        copyX = config_dict['effectiveMarginOffSet'][0]
+        copyY = config_dict['effectiveMarginOffSet'][1]
+        copyWidth = screenshot.width() - config_dict['effectiveMarginOffSet'][0] - config_dict['effectiveMarginOffSet'][2]
+        copyHeight = screenshot.height() - config_dict['effectiveMarginOffSet'][1] - config_dict['effectiveMarginOffSet'][3]
+        testScreenshotImage = screenshot.copy(copyX, copyY, copyWidth, copyHeight).scaledToWidth(320)
+        testScreenshotPixmap = QtGui.QPixmap.fromImage(testScreenshotImage)
+        testScreenshotItem = QGraphicsPixmapItem(testScreenshotPixmap)
+        testScreenshotScene = QGraphicsScene()
+        testScreenshotScene.addItem(testScreenshotItem)
+        self.marginOffsetPreviewBox.setScene(testScreenshotScene)
+    def setCustomizedMarginOffset(self, offsetIndex:[0,1,2,3], mainGUI, targetValue):
+        try:
+            config_dict['effectiveMarginOffSet'][offsetIndex] = targetValue
+            util.config_writeConfig(config_dict)
+            self.takeTestScreenshot(mainGUI)
+        except Exception as e:
+            print(e)
+    def setToPresetMarginOffset(self, presetName):
+        if presetName == '自定义':
+            return
+        if presetName == '雷电模拟器':
+            self.marginOffsetSpinBoxLeft.setValue(0)
+            self.marginOffsetSpinBoxTop.setValue(32)
+            self.marginOffsetSpinBoxRight.setValue(42)
+            self.marginOffsetSpinBoxBottom.setValue(0)
+        if presetName == 'DMM官方工具':
+            self.marginOffsetSpinBoxLeft.setValue(0)
+            self.marginOffsetSpinBoxTop.setValue(44)
+            self.marginOffsetSpinBoxRight.setValue(0)
+            self.marginOffsetSpinBoxBottom.setValue(0)
+        if presetName == 'MuMu模拟器':
+            self.marginOffsetSpinBoxLeft.setValue(0)
+            self.marginOffsetSpinBoxTop.setValue(42)
+            self.marginOffsetSpinBoxRight.setValue(0)
+            self.marginOffsetSpinBoxBottom.setValue(42)
+    def closeConfigDialog(self):
+        self.close()
 class generateCharCandidateRunnable(QRunnable):
     def __init__(self, charImageList, mainGUI, i, ):
         QRunnable.__init__(self)
@@ -347,6 +415,11 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.handle = 0
         self.queryStatusTag.setText("请选择句柄")
         self.queryStatusTag.setStyleSheet("color:red")
+        self.configDialogButton.clicked.connect(self.showConfigDialog)
+    def showConfigDialog(self):
+        self.configDialog = GUIConfigDialogWidget(mainGUI=self)
+        self.configDialog.show()
+        self.configDialog.exec_()
     def resetAll(self):
         self.activeTeamNum = 1
         self.team1RadioButton.setChecked(True)
@@ -572,10 +645,10 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         for i in range(self.solutionListLayout.count()):
             self.solutionListLayout.itemAt(i).widget().deleteLater()
         screenshot = screen.grabWindow(self.handle).toImage()
-        copyX = config.simulator['marginOffset'][0]
-        copyY = config.simulator['marginOffset'][1]
-        copyWidth = screenshot.width() - config.simulator['marginOffset'][0] - config.simulator['marginOffset'][2]
-        copyHeight = screenshot.height() - config.simulator['marginOffset'][1] - config.simulator['marginOffset'][3]
+        copyX = config_dict['effectiveMarginOffSet'][0]
+        copyY = config_dict['effectiveMarginOffSet'][1]
+        copyWidth = screenshot.width() - config_dict['effectiveMarginOffSet'][0] - config_dict['effectiveMarginOffSet'][2]
+        copyHeight = screenshot.height() - config_dict['effectiveMarginOffSet'][1] - config_dict['effectiveMarginOffSet'][3]
         gameImage = screenshot.copy(copyX, copyY, copyWidth, copyHeight) # 根据边框裁剪出游戏图像
         if teamNum==0:
             # 当前目标队，右上

@@ -638,12 +638,25 @@
     <string>全部重置</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="configDialogButton">
+   <property name="geometry">
+    <rect>
+     <x>720</x>
+     <y>610</y>
+     <width>91</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>设定</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
  <buttongroups>
+  <buttongroup name="activeTeamNumButtonGroup"/>
   <buttongroup name="algorithmButtonGroup"/>
   <buttongroup name="regionButtonGroup"/>
-  <buttongroup name="activeTeamNumButtonGroup"/>
  </buttongroups>
 </ui>

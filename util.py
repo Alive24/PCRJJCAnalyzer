@@ -106,6 +106,8 @@ def config_loadConfig():
         config_dict = {
             'apiKey': '',
             'region': 1,
+            'marginOffsetMode': '雷电模拟器',
+            'effectiveMarginOffSet': [0, 32, 42, 0]
         }
         config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'w',encoding='utf-8')
         json.dump(config_dict,config_file,ensure_ascii=False)

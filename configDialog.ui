@@ -27,6 +27,9 @@
    </property>
   </widget>
   <widget class="QGraphicsView" name="marginOffsetPreviewBox">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>70</x>
@@ -43,6 +46,9 @@
    </property>
   </widget>
   <widget class="QSpinBox" name="marginOffsetSpinBoxLeft">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -53,6 +59,9 @@
    </property>
   </widget>
   <widget class="QSpinBox" name="marginOffsetSpinBoxRight">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>400</x>
@@ -63,6 +72,9 @@
    </property>
   </widget>
   <widget class="QSpinBox" name="marginOffsetSpinBoxTop">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>200</x>
@@ -73,6 +85,9 @@
    </property>
   </widget>
   <widget class="QSpinBox" name="marginOffsetSpinBoxBottom">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>200</x>
@@ -96,6 +111,9 @@
    </property>
   </widget>
   <widget class="QComboBox" name="marginOffsetPresetComboBox">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>110</x>
@@ -119,6 +137,9 @@
    </property>
   </widget>
   <widget class="QPushButton" name="testScreenshotButton">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>370</x>
@@ -129,6 +150,19 @@
    </property>
    <property name="text">
     <string>截屏测试</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="marginOffsetSetterLabel_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>30</y>
+     <width>91</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>（已弃用）</string>
    </property>
   </widget>
  </widget>

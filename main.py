@@ -51,45 +51,47 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
         self.marginOffsetSpinBoxBottom.valueChanged.connect(lambda targetValue: self.setCustomizedMarginOffset(3, mainGUI, targetValue))
         self.marginOffsetPresetComboBox.activated[str].connect(lambda presetName: self.setToPresetMarginOffset(presetName))
     
-    def takeTestScreenshot(self, mainGUI):
-        screenshot = screen.grabWindow(mainGUI.handle).toImage()
-        copyX = config_dict['effectiveMarginOffSet'][0]
-        copyY = config_dict['effectiveMarginOffSet'][1]
-        copyWidth = screenshot.width() - config_dict['effectiveMarginOffSet'][0] - config_dict['effectiveMarginOffSet'][2]
-        copyHeight = screenshot.height() - config_dict['effectiveMarginOffSet'][1] - config_dict['effectiveMarginOffSet'][3]
-        testScreenshotImage = screenshot.copy(copyX, copyY, copyWidth, copyHeight).scaledToWidth(320)
-        testScreenshotPixmap = QtGui.QPixmap.fromImage(testScreenshotImage)
-        testScreenshotItem = QGraphicsPixmapItem(testScreenshotPixmap)
-        testScreenshotScene = QGraphicsScene()
-        testScreenshotScene.addItem(testScreenshotItem)
-        self.marginOffsetPreviewBox.setScene(testScreenshotScene)
-    def setCustomizedMarginOffset(self, offsetIndex:[0,1,2,3], mainGUI, targetValue):
-        try:
-            config_dict['effectiveMarginOffSet'][offsetIndex] = targetValue
-            util.config_writeConfig(config_dict)
-            self.takeTestScreenshot(mainGUI)
-        except Exception as e:
-            print(e)
-    def setToPresetMarginOffset(self, presetName):
-        if presetName == '自定义':
-            return
-        if presetName == '雷电模拟器':
-            self.marginOffsetSpinBoxLeft.setValue(0)
-            self.marginOffsetSpinBoxTop.setValue(32)
-            self.marginOffsetSpinBoxRight.setValue(42)
-            self.marginOffsetSpinBoxBottom.setValue(0)
-        if presetName == 'DMM官方工具':
-            self.marginOffsetSpinBoxLeft.setValue(0)
-            self.marginOffsetSpinBoxTop.setValue(44)
-            self.marginOffsetSpinBoxRight.setValue(0)
-            self.marginOffsetSpinBoxBottom.setValue(0)
-        if presetName == 'MuMu模拟器':
-            self.marginOffsetSpinBoxLeft.setValue(0)
-            self.marginOffsetSpinBoxTop.setValue(42)
-            self.marginOffsetSpinBoxRight.setValue(0)
-            self.marginOffsetSpinBoxBottom.setValue(42)
+    # 以下代码自PR#9后已弃用
+    # def takeTestScreenshot(self, mainGUI):
+    #     screenshot = screen.grabWindow(mainGUI.handle).toImage()
+    #     copyX = config_dict['effectiveMarginOffSet'][0]
+    #     copyY = config_dict['effectiveMarginOffSet'][1]
+    #     copyWidth = screenshot.width() - config_dict['effectiveMarginOffSet'][0] - config_dict['effectiveMarginOffSet'][2]
+    #     copyHeight = screenshot.height() - config_dict['effectiveMarginOffSet'][1] - config_dict['effectiveMarginOffSet'][3]
+    #     testScreenshotImage = screenshot.copy(copyX, copyY, copyWidth, copyHeight).scaledToWidth(320)
+    #     testScreenshotPixmap = QtGui.QPixmap.fromImage(testScreenshotImage)
+    #     testScreenshotItem = QGraphicsPixmapItem(testScreenshotPixmap)
+    #     testScreenshotScene = QGraphicsScene()
+    #     testScreenshotScene.addItem(testScreenshotItem)
+    #     self.marginOffsetPreviewBox.setScene(testScreenshotScene)
+    # def setCustomizedMarginOffset(self, offsetIndex:[0,1,2,3], mainGUI, targetValue):
+    #     try:
+    #         config_dict['effectiveMarginOffSet'][offsetIndex] = targetValue
+    #         util.config_writeConfig(config_dict)
+    #         self.takeTestScreenshot(mainGUI)
+    #     except Exception as e:
+    #         print(e)
+    # def setToPresetMarginOffset(self, presetName):
+    #     if presetName == '自定义':
+    #         return
+    #     if presetName == '雷电模拟器':
+    #         self.marginOffsetSpinBoxLeft.setValue(0)
+    #         self.marginOffsetSpinBoxTop.setValue(32)
+    #         self.marginOffsetSpinBoxRight.setValue(42)
+    #         self.marginOffsetSpinBoxBottom.setValue(0)
+    #     if presetName == 'DMM官方工具':
+    #         self.marginOffsetSpinBoxLeft.setValue(0)
+    #         self.marginOffsetSpinBoxTop.setValue(44)
+    #         self.marginOffsetSpinBoxRight.setValue(0)
+    #         self.marginOffsetSpinBoxBottom.setValue(0)
+    #     if presetName == 'MuMu模拟器':
+    #         self.marginOffsetSpinBoxLeft.setValue(0)
+    #         self.marginOffsetSpinBoxTop.setValue(42)
+    #         self.marginOffsetSpinBoxRight.setValue(0)
+    #         self.marginOffsetSpinBoxBottom.setValue(42)
     def closeConfigDialog(self):
         self.close()
+
 class generateCharCandidateRunnable(QRunnable):
     def __init__(self, charImageList, mainGUI, i, ):
         QRunnable.__init__(self)
@@ -340,7 +342,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
     def __init__(self, parent=None):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowTitle('PCRJJCAnalyzer-v0.1.0-beta2')
+        self.setWindowTitle('PCRJJCAnalyzer-v0.1.1-beta1')
         self.exclusionList  = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         self.excludingSolutionIDList = ['','','']
         self.exclusionCheckBoxButtonGroup = QButtonGroup()

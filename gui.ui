@@ -651,12 +651,25 @@
     <string>设定</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="updateHandleSelectorListButton">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>620</y>
+     <width>51</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>刷新</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
  <buttongroups>
   <buttongroup name="activeTeamNumButtonGroup"/>
-  <buttongroup name="algorithmButtonGroup"/>
   <buttongroup name="regionButtonGroup"/>
+  <buttongroup name="algorithmButtonGroup"/>
  </buttongroups>
 </ui>

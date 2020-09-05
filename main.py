@@ -397,15 +397,26 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             self.TM_SQDIFF.setChecked(True)
         if self.algorithm == "TM_SQDIFF_NORMED":
             self.TM_SQDIFF_NORMED.setChecked(True)
+        self.updateHandleSelectorListButton.clicked.connect(self.initializeHandleSelector)
+        self.handleSelectorComboBox.activated[str].connect(self.onHandleSelect)
+        self.handle = 0
+        self.initializeHandleSelector()
+        self.char1Dropbox.activated[str].connect(lambda candidateName, charNum=1: self.onCharCandidateSelect(candidateName, charNum))
+        self.char2Dropbox.activated[str].connect(lambda candidateName, charNum=2: self.onCharCandidateSelect(candidateName, charNum))
+        self.char3Dropbox.activated[str].connect(lambda candidateName, charNum=3: self.onCharCandidateSelect(candidateName, charNum))
+        self.char4Dropbox.activated[str].connect(lambda candidateName, charNum=4: self.onCharCandidateSelect(candidateName, charNum))
+        self.char5Dropbox.activated[str].connect(lambda candidateName, charNum=5: self.onCharCandidateSelect(candidateName, charNum))
+        self.queryStatusTag.setText("请选择句柄")
+        self.queryStatusTag.setStyleSheet("color:red")
+        self.configDialogButton.clicked.connect(self.showConfigDialog)
+    def initializeHandleSelector(self):
         emulator_lst = dict()
         emulator_hwnd = ["subWin", "canvasWin"] # subWin: nox, ldplayer | canvasWin: mumu
-
         def check_emulator_window(hwnd, p):
             if win32gui.GetClassName(hwnd) in emulator_hwnd and hwnd not in emulator_lst:
                 emulator_lst.update({hwnd: p})
             else:
                 win32gui.EnumChildWindows(hwnd, check_emulator_window, p)
-
         def gui_get_all_hwnd(hwnd, mouse):
             if win32gui.IsWindow(hwnd) and win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindowVisible(hwnd):
                 if win32gui.GetClassName(hwnd) == "UnityWndClass" and win32gui.GetWindowText(hwnd) == "PrincessConnectReDive": # DMM Game Player
@@ -418,17 +429,10 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             if t is not "":
                 self.handleList.append([h, t])
         self.titleList = [handle[1] for handle in self.handleList]
+        self.handleSelectorComboBox.clear()
         self.handleSelectorComboBox.addItems(self.titleList)
-        self.handleSelectorComboBox.activated[str].connect(self.onHandleSelect)
-        self.char1Dropbox.activated[str].connect(lambda candidateName, charNum=1: self.onCharCandidateSelect(candidateName, charNum))
-        self.char2Dropbox.activated[str].connect(lambda candidateName, charNum=2: self.onCharCandidateSelect(candidateName, charNum))
-        self.char3Dropbox.activated[str].connect(lambda candidateName, charNum=3: self.onCharCandidateSelect(candidateName, charNum))
-        self.char4Dropbox.activated[str].connect(lambda candidateName, charNum=4: self.onCharCandidateSelect(candidateName, charNum))
-        self.char5Dropbox.activated[str].connect(lambda candidateName, charNum=5: self.onCharCandidateSelect(candidateName, charNum))
-        self.handle = 0
-        self.queryStatusTag.setText("请选择句柄")
-        self.queryStatusTag.setStyleSheet("color:red")
-        self.configDialogButton.clicked.connect(self.showConfigDialog)
+        if len(self.titleList) == 1:
+            self.handle = list(emulator_lst.keys())[0]
     def showConfigDialog(self):
         self.configDialog = GUIConfigDialogWidget(mainGUI=self)
         self.configDialog.show()

@@ -395,13 +395,24 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             self.TM_SQDIFF.setChecked(True)
         if self.algorithm == "TM_SQDIFF_NORMED":
             self.TM_SQDIFF_NORMED.setChecked(True)
-        hwnd_title = dict()
-        def gui_get_all_hwnd(hwnd,mouse):
+        emulator_lst = dict()
+        emulator_hwnd = ["subWin", "canvasWin"] # subWin: nox, ldplayer | canvasWin: mumu
+
+        def check_emulator_window(hwnd, p):
+            if win32gui.GetClassName(hwnd) in emulator_hwnd and hwnd not in emulator_lst:
+                emulator_lst.update({hwnd: p})
+            else:
+                win32gui.EnumChildWindows(hwnd, check_emulator_window, p)
+
+        def gui_get_all_hwnd(hwnd, mouse):
             if win32gui.IsWindow(hwnd) and win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindowVisible(hwnd):
-                hwnd_title.update({hwnd:win32gui.GetWindowText(hwnd)})
+                if win32gui.GetClassName(hwnd) == "UnityWndClass" and win32gui.GetWindowText(hwnd) == "PrincessConnectReDive": # DMM Game Player
+                    emulator_lst.update({hwnd: "DMM_PrincessConnectReDive"})
+                else:
+                    win32gui.EnumChildWindows(hwnd, check_emulator_window, win32gui.GetWindowText(hwnd))
         win32gui.EnumWindows(gui_get_all_hwnd, 0)
         self.handleList = []
-        for h,t in hwnd_title.items():
+        for h,t in emulator_lst.items():
             if t is not "":
                 self.handleList.append([h, t])
         self.titleList = [handle[1] for handle in self.handleList]
@@ -644,12 +655,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             scene.clear()
         for i in range(self.solutionListLayout.count()):
             self.solutionListLayout.itemAt(i).widget().deleteLater()
-        screenshot = screen.grabWindow(self.handle).toImage()
-        copyX = config_dict['effectiveMarginOffSet'][0]
-        copyY = config_dict['effectiveMarginOffSet'][1]
-        copyWidth = screenshot.width() - config_dict['effectiveMarginOffSet'][0] - config_dict['effectiveMarginOffSet'][2]
-        copyHeight = screenshot.height() - config_dict['effectiveMarginOffSet'][1] - config_dict['effectiveMarginOffSet'][3]
-        gameImage = screenshot.copy(copyX, copyY, copyWidth, copyHeight) # 根据边框裁剪出游戏图像
+        gameImage = screen.grabWindow(self.handle).toImage() # 直接截取vbox子窗口和DMM的UnityWnd
+        #gameImage.save('gameImage.png', 'PNG')
         if teamNum==0:
             # 当前目标队，右上
             translatedCharY = gameImage.height()*config.charLocationRatioConfig_CurrentEnemyTeam['y'] # 根据比例计算出对方阵容图标的y值、h值、w值

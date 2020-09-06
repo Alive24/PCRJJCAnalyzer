@@ -371,7 +371,6 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.team2RadioButton.clicked.connect(lambda: self.switchActiveTeam(2))
         self.team3RadioButton.clicked.connect(lambda: self.switchActiveTeam(3))
         self.apiKeylineEdit.textChanged.connect(self.setApiKey)
-        self.region = config.region
         self.algorithm = config.algorithm
         self.apiKey = config_dict['apiKey']
         self.apiKeylineEdit.setText(self.apiKey)
@@ -382,11 +381,13 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.team1RadioButton.setChecked(True)
         self.bookmarkList = util.solution_loadLists()[0]
         self.ruleOutList = util.solution_loadLists()[1]
-        if self.region == 1:
+        if config_dict['region'] == 1:
             self.setRegion1.setChecked(True)
-        if self.region == 2:
+        if config_dict['region'] == 2:
             self.setRegion2.setChecked(True)
-        if self.region == 3:
+        if config_dict['region'] == 3:
+            self.setRegion3.setChecked(True)
+        if config_dict['region'] == 4:
             self.setRegion3.setChecked(True)
         if self.algorithm == "TM_CCOEFF":
             self.TM_CCOEFF.setChecked(True)
@@ -608,7 +609,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             "page": 1, 
             "sort": 1, 
             "ts": int(time.time()), 
-            "region": self.region
+            "region": config_dict['region']
         }        
         queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
         QThreadPool.globalInstance().start(queryRunnable)
@@ -642,13 +643,17 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         clickedRadioButton = self.sender()
         if clickedRadioButton.isChecked():
             if clickedRadioButton.objectName() == "setRegion1":
-                self.region = 1
+                config_dict['region'] = 1
             if clickedRadioButton.objectName() == "setRegion2":
-                self.region = 2
+                config_dict['region'] = 2
             if clickedRadioButton.objectName() == "setRegion3":
-                self.region = 3
+                config_dict['region'] = 3
             if clickedRadioButton.objectName() == "setRegion4":
-                self.region = 4
+                config_dict['region'] = 4
+        try:
+            util.config_writeConfig(config_dict)
+        except Exception as e:
+            print(e)
     def recognizeAndSolve(self, teamNum:[0, 1, 2, 3, 4]):
         self.exclusionCheckBoxButtonGroup = QButtonGroup()
         self.char1Dropbox.clear()
@@ -747,7 +752,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             "page": 1, 
             "sort": 1, 
             "ts": int(time.time()), 
-            "region": self.region
+            "region": config_dict['region']
         }        
         queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
         QThreadPool.globalInstance().start(queryRunnable)

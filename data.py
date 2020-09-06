@@ -260,7 +260,7 @@ refGrid =[
         {'name': '优妮', 'id': 1110}, 
         {'name': '镜华(万圣节)', 'id': 1111}
     ], 
-    [
+    [#Row21
         {'name': '禊(万圣节)', 'id': 1112}, 
         {'name': '美美(万圣节)', 'id': 1113}, 
         {'name': '露娜', 'id': 1114}, 
@@ -273,7 +273,7 @@ refGrid =[
         {'name': '霞(魔法少女)', 'id': 1122}, 
         {'name': '栞(魔法少女)', 'id': 1123}
     ], 
-    [
+    [#Row22
         {'name': '卯月(偶像大师)', 'id': 1124}, 
         {'name': '凛(偶像大师)', 'id': 1125}, 
         {'name': '未央(偶像大师)', 'id': 1126}, 
@@ -286,7 +286,7 @@ refGrid =[
         {'name': '七七香（夏日）', 'id': 1133}, 
         {'name': '初音（夏日）', 'id': 1134}
     ], 
-    [
+    [#Row23
         {'name': '美里（夏日）', 'id': 1135}, 
         {'name': '纯（夏日）', 'id': 1136}, 
         {'name': '优衣(公主)', 'id': 1802}, 
@@ -298,7 +298,43 @@ refGrid =[
         {'name': '无角色', 'id': 1000}, 
         {'name': '无角色', 'id': 1000}, 
         {'name': '无角色', 'id': 1000}
+    ],
+    [#Row24
+        {'name': '日和莉', 'id': 1001}, 
+        {'name': '优衣', 'id': 1002}, 
+        {'name': '怜', 'id': 1003}, 
+        {'name': '真步', 'id': 1010}, 
+        {'name': '璃乃', 'id': 1011}, 
+        {'name': '初音', 'id': 1012}, 
+        {'name': '伊绪', 'id': 1018}, 
+        {'name': '铃', 'id': 1026}, 
+        {'name': '由加莉', 'id': 1034}, 
+        {'name': '珠希', 'id': 1046}, 
+        {'name': '美冬', 'id': 1048}
+    ],
+    [#Row25
+        {'name': '静流', 'id': 1049}, 
+        {'name': '莉玛', 'id': 1052}, 
+        {'name': '贪吃佩可', 'id': 1802}, 
+        {'name': '可可萝', 'id': 1059}, 
+        {'name': '凯留', 'id': 1060}, 
+        {'name': '无角色', 'id': 1000}, 
+        {'name': '无角色', 'id': 1000}, 
+        {'name': '无角色', 'id': 1000}, 
+        {'name': '无角色', 'id': 1000}, 
+        {'name': '无角色', 'id': 1000}, 
+        {'name': '无角色', 'id': 1000}
     ]
 ]
 
 
+def updateMultiformItemsInRow(rowNumber):
+    for item in refGrid[rowNumber-1]:
+        for i in range(rowNumber-2):
+            for j in range(11):
+                if refGrid[i][j]['name'] == item['name']:
+                    item['id'] = refGrid[i][j]['id']
+                    continue
+    print(refGrid[rowNumber-1])
+
+# updateMultiformItemsInRow(25)

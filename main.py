@@ -21,6 +21,7 @@ from PyQt5.QtCore import QRunnable, QThreadPool, pyqtSlot, QThread, QMetaObject,
 from gui import Ui_PCRJJCAnalyzerGUI
 from solutionWidget import Ui_solutionWidget
 from configDialog import Ui_configDialog
+from exceptHookHandler import ExceptHookHandler
 
 class GUIConfigDialogWidget(QDialog, Ui_configDialog):
     def __init__(self, parent=None, mainGUI=None):
@@ -51,45 +52,47 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
         self.marginOffsetSpinBoxBottom.valueChanged.connect(lambda targetValue: self.setCustomizedMarginOffset(3, mainGUI, targetValue))
         self.marginOffsetPresetComboBox.activated[str].connect(lambda presetName: self.setToPresetMarginOffset(presetName))
     
-    def takeTestScreenshot(self, mainGUI):
-        screenshot = screen.grabWindow(mainGUI.handle).toImage()
-        copyX = config_dict['effectiveMarginOffSet'][0]
-        copyY = config_dict['effectiveMarginOffSet'][1]
-        copyWidth = screenshot.width() - config_dict['effectiveMarginOffSet'][0] - config_dict['effectiveMarginOffSet'][2]
-        copyHeight = screenshot.height() - config_dict['effectiveMarginOffSet'][1] - config_dict['effectiveMarginOffSet'][3]
-        testScreenshotImage = screenshot.copy(copyX, copyY, copyWidth, copyHeight).scaledToWidth(320)
-        testScreenshotPixmap = QtGui.QPixmap.fromImage(testScreenshotImage)
-        testScreenshotItem = QGraphicsPixmapItem(testScreenshotPixmap)
-        testScreenshotScene = QGraphicsScene()
-        testScreenshotScene.addItem(testScreenshotItem)
-        self.marginOffsetPreviewBox.setScene(testScreenshotScene)
-    def setCustomizedMarginOffset(self, offsetIndex:[0,1,2,3], mainGUI, targetValue):
-        try:
-            config_dict['effectiveMarginOffSet'][offsetIndex] = targetValue
-            util.config_writeConfig(config_dict)
-            self.takeTestScreenshot(mainGUI)
-        except Exception as e:
-            print(e)
-    def setToPresetMarginOffset(self, presetName):
-        if presetName == '自定义':
-            return
-        if presetName == '雷电模拟器':
-            self.marginOffsetSpinBoxLeft.setValue(0)
-            self.marginOffsetSpinBoxTop.setValue(32)
-            self.marginOffsetSpinBoxRight.setValue(42)
-            self.marginOffsetSpinBoxBottom.setValue(0)
-        if presetName == 'DMM官方工具':
-            self.marginOffsetSpinBoxLeft.setValue(0)
-            self.marginOffsetSpinBoxTop.setValue(44)
-            self.marginOffsetSpinBoxRight.setValue(0)
-            self.marginOffsetSpinBoxBottom.setValue(0)
-        if presetName == 'MuMu模拟器':
-            self.marginOffsetSpinBoxLeft.setValue(0)
-            self.marginOffsetSpinBoxTop.setValue(42)
-            self.marginOffsetSpinBoxRight.setValue(0)
-            self.marginOffsetSpinBoxBottom.setValue(42)
+    # 以下代码自PR#9后已弃用
+    # def takeTestScreenshot(self, mainGUI):
+    #     screenshot = screen.grabWindow(mainGUI.handle).toImage()
+    #     copyX = config_dict['effectiveMarginOffSet'][0]
+    #     copyY = config_dict['effectiveMarginOffSet'][1]
+    #     copyWidth = screenshot.width() - config_dict['effectiveMarginOffSet'][0] - config_dict['effectiveMarginOffSet'][2]
+    #     copyHeight = screenshot.height() - config_dict['effectiveMarginOffSet'][1] - config_dict['effectiveMarginOffSet'][3]
+    #     testScreenshotImage = screenshot.copy(copyX, copyY, copyWidth, copyHeight).scaledToWidth(320)
+    #     testScreenshotPixmap = QtGui.QPixmap.fromImage(testScreenshotImage)
+    #     testScreenshotItem = QGraphicsPixmapItem(testScreenshotPixmap)
+    #     testScreenshotScene = QGraphicsScene()
+    #     testScreenshotScene.addItem(testScreenshotItem)
+    #     self.marginOffsetPreviewBox.setScene(testScreenshotScene)
+    # def setCustomizedMarginOffset(self, offsetIndex:[0,1,2,3], mainGUI, targetValue):
+    #     try:
+    #         config_dict['effectiveMarginOffSet'][offsetIndex] = targetValue
+    #         util.config_writeConfig(config_dict)
+    #         self.takeTestScreenshot(mainGUI)
+    #     except Exception as e:
+    #         print(e)
+    # def setToPresetMarginOffset(self, presetName):
+    #     if presetName == '自定义':
+    #         return
+    #     if presetName == '雷电模拟器':
+    #         self.marginOffsetSpinBoxLeft.setValue(0)
+    #         self.marginOffsetSpinBoxTop.setValue(32)
+    #         self.marginOffsetSpinBoxRight.setValue(42)
+    #         self.marginOffsetSpinBoxBottom.setValue(0)
+    #     if presetName == 'DMM官方工具':
+    #         self.marginOffsetSpinBoxLeft.setValue(0)
+    #         self.marginOffsetSpinBoxTop.setValue(44)
+    #         self.marginOffsetSpinBoxRight.setValue(0)
+    #         self.marginOffsetSpinBoxBottom.setValue(0)
+    #     if presetName == 'MuMu模拟器':
+    #         self.marginOffsetSpinBoxLeft.setValue(0)
+    #         self.marginOffsetSpinBoxTop.setValue(42)
+    #         self.marginOffsetSpinBoxRight.setValue(0)
+    #         self.marginOffsetSpinBoxBottom.setValue(42)
     def closeConfigDialog(self):
         self.close()
+
 class generateCharCandidateRunnable(QRunnable):
     def __init__(self, charImageList, mainGUI, i, ):
         QRunnable.__init__(self)
@@ -340,7 +343,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
     def __init__(self, parent=None):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowTitle('PCRJJCAnalyzer-v0.1.0-beta2')
+        self.appExceptionHandler = ExceptHookHandler(self, logFile=os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "log.txt"))
+        self.setWindowTitle('PCRJJCAnalyzer-v0.1.1-beta1')
         self.exclusionList  = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         self.excludingSolutionIDList = ['','','']
         self.exclusionCheckBoxButtonGroup = QButtonGroup()
@@ -356,6 +360,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.setRegion1.clicked.connect(self.setRegionOnClicked)
         self.setRegion2.clicked.connect(self.setRegionOnClicked)
         self.setRegion3.clicked.connect(self.setRegionOnClicked)
+        self.setRegion4.clicked.connect(self.setRegionOnClicked)
         self.TM_CCOEFF.clicked.connect(self.setTMAlgorithmOnClicked)
         self.TM_CCOEFF_NORMED.clicked.connect(self.setTMAlgorithmOnClicked)
         self.TM_CCORR.clicked.connect(self.setTMAlgorithmOnClicked)
@@ -366,7 +371,6 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.team2RadioButton.clicked.connect(lambda: self.switchActiveTeam(2))
         self.team3RadioButton.clicked.connect(lambda: self.switchActiveTeam(3))
         self.apiKeylineEdit.textChanged.connect(self.setApiKey)
-        self.region = config.region
         self.algorithm = config.algorithm
         self.apiKey = config_dict['apiKey']
         self.apiKeylineEdit.setText(self.apiKey)
@@ -377,11 +381,13 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.team1RadioButton.setChecked(True)
         self.bookmarkList = util.solution_loadLists()[0]
         self.ruleOutList = util.solution_loadLists()[1]
-        if self.region == 1:
+        if config_dict['region'] == 1:
             self.setRegion1.setChecked(True)
-        if self.region == 2:
+        if config_dict['region'] == 2:
             self.setRegion2.setChecked(True)
-        if self.region == 3:
+        if config_dict['region'] == 3:
+            self.setRegion3.setChecked(True)
+        if config_dict['region'] == 4:
             self.setRegion3.setChecked(True)
         if self.algorithm == "TM_CCOEFF":
             self.TM_CCOEFF.setChecked(True)
@@ -395,15 +401,26 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             self.TM_SQDIFF.setChecked(True)
         if self.algorithm == "TM_SQDIFF_NORMED":
             self.TM_SQDIFF_NORMED.setChecked(True)
+        self.updateHandleSelectorListButton.clicked.connect(self.initializeHandleSelector)
+        self.handleSelectorComboBox.activated[str].connect(self.onHandleSelect)
+        self.handle = 0
+        self.initializeHandleSelector()
+        self.char1Dropbox.activated[str].connect(lambda candidateName, charNum=1: self.onCharCandidateSelect(candidateName, charNum))
+        self.char2Dropbox.activated[str].connect(lambda candidateName, charNum=2: self.onCharCandidateSelect(candidateName, charNum))
+        self.char3Dropbox.activated[str].connect(lambda candidateName, charNum=3: self.onCharCandidateSelect(candidateName, charNum))
+        self.char4Dropbox.activated[str].connect(lambda candidateName, charNum=4: self.onCharCandidateSelect(candidateName, charNum))
+        self.char5Dropbox.activated[str].connect(lambda candidateName, charNum=5: self.onCharCandidateSelect(candidateName, charNum))
+        self.queryStatusTag.setText("请选择句柄")
+        self.queryStatusTag.setStyleSheet("color:red")
+        self.configDialogButton.clicked.connect(self.showConfigDialog)
+    def initializeHandleSelector(self):
         emulator_lst = dict()
         emulator_hwnd = ["subWin", "canvasWin"] # subWin: nox, ldplayer | canvasWin: mumu
-
         def check_emulator_window(hwnd, p):
             if win32gui.GetClassName(hwnd) in emulator_hwnd and hwnd not in emulator_lst:
                 emulator_lst.update({hwnd: p})
             else:
                 win32gui.EnumChildWindows(hwnd, check_emulator_window, p)
-
         def gui_get_all_hwnd(hwnd, mouse):
             if win32gui.IsWindow(hwnd) and win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindowVisible(hwnd):
                 if win32gui.GetClassName(hwnd) == "UnityWndClass" and win32gui.GetWindowText(hwnd) == "PrincessConnectReDive": # DMM Game Player
@@ -416,17 +433,10 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             if t is not "":
                 self.handleList.append([h, t])
         self.titleList = [handle[1] for handle in self.handleList]
+        self.handleSelectorComboBox.clear()
         self.handleSelectorComboBox.addItems(self.titleList)
-        self.handleSelectorComboBox.activated[str].connect(self.onHandleSelect)
-        self.char1Dropbox.activated[str].connect(lambda candidateName, charNum=1: self.onCharCandidateSelect(candidateName, charNum))
-        self.char2Dropbox.activated[str].connect(lambda candidateName, charNum=2: self.onCharCandidateSelect(candidateName, charNum))
-        self.char3Dropbox.activated[str].connect(lambda candidateName, charNum=3: self.onCharCandidateSelect(candidateName, charNum))
-        self.char4Dropbox.activated[str].connect(lambda candidateName, charNum=4: self.onCharCandidateSelect(candidateName, charNum))
-        self.char5Dropbox.activated[str].connect(lambda candidateName, charNum=5: self.onCharCandidateSelect(candidateName, charNum))
-        self.handle = 0
-        self.queryStatusTag.setText("请选择句柄")
-        self.queryStatusTag.setStyleSheet("color:red")
-        self.configDialogButton.clicked.connect(self.showConfigDialog)
+        if len(self.titleList) == 1:
+            self.handle = list(emulator_lst.keys())[0]
     def showConfigDialog(self):
         self.configDialog = GUIConfigDialogWidget(mainGUI=self)
         self.configDialog.show()
@@ -599,7 +609,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             "page": 1, 
             "sort": 1, 
             "ts": int(time.time()), 
-            "region": self.region
+            "region": config_dict['region']
         }        
         queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
         QThreadPool.globalInstance().start(queryRunnable)
@@ -633,11 +643,17 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         clickedRadioButton = self.sender()
         if clickedRadioButton.isChecked():
             if clickedRadioButton.objectName() == "setRegion1":
-                self.region = 1
+                config_dict['region'] = 1
             if clickedRadioButton.objectName() == "setRegion2":
-                self.region = 2
+                config_dict['region'] = 2
             if clickedRadioButton.objectName() == "setRegion3":
-                self.region = 3
+                config_dict['region'] = 3
+            if clickedRadioButton.objectName() == "setRegion4":
+                config_dict['region'] = 4
+        try:
+            util.config_writeConfig(config_dict)
+        except Exception as e:
+            print(e)
     def recognizeAndSolve(self, teamNum:[0, 1, 2, 3, 4]):
         self.exclusionCheckBoxButtonGroup = QButtonGroup()
         self.char1Dropbox.clear()
@@ -736,7 +752,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             "page": 1, 
             "sort": 1, 
             "ts": int(time.time()), 
-            "region": self.region
+            "region": config_dict['region']
         }        
         queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
         QThreadPool.globalInstance().start(queryRunnable)

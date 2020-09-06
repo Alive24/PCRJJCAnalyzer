@@ -102,14 +102,14 @@
   <widget class="QRadioButton" name="setRegion3">
    <property name="geometry">
     <rect>
-     <x>410</x>
+     <x>400</x>
      <y>10</y>
-     <width>51</width>
+     <width>61</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>日服</string>
+    <string>繁中服</string>
    </property>
    <attribute name="buttonGroup">
     <string notr="true">regionButtonGroup</string>
@@ -118,14 +118,14 @@
   <widget class="QRadioButton" name="setRegion2">
    <property name="geometry">
     <rect>
-     <x>350</x>
+     <x>340</x>
      <y>10</y>
      <width>61</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>繁中服</string>
+    <string>简中服</string>
    </property>
    <attribute name="buttonGroup">
     <string notr="true">regionButtonGroup</string>
@@ -141,7 +141,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>简中服</string>
+    <string>不限</string>
    </property>
    <attribute name="buttonGroup">
     <string notr="true">regionButtonGroup</string>
@@ -651,12 +651,38 @@
     <string>设定</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="updateHandleSelectorListButton">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>620</y>
+     <width>51</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>刷新</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="setRegion4">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>10</y>
+     <width>51</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>日服</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="activeTeamNumButtonGroup"/>
   <buttongroup name="algorithmButtonGroup"/>
+  <buttongroup name="activeTeamNumButtonGroup"/>
   <buttongroup name="regionButtonGroup"/>
  </buttongroups>
 </ui>

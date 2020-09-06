@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>825</width>
-    <height>648</height>
+    <height>647</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -461,7 +461,7 @@
   <widget class="QLineEdit" name="apiKeylineEdit">
    <property name="geometry">
     <rect>
-     <x>500</x>
+     <x>600</x>
      <y>620</y>
      <width>113</width>
      <height>20</height>
@@ -471,7 +471,7 @@
   <widget class="QLabel" name="apiKeyLabel">
    <property name="geometry">
     <rect>
-     <x>440</x>
+     <x>550</x>
      <y>620</y>
      <width>51</width>
      <height>16</height>
@@ -677,12 +677,35 @@
     <string>日服</string>
    </property>
   </widget>
+  <widget class="QLabel" name="searchServerLabel">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>620</y>
+     <width>54</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>搜索用API</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="searchServerDrop">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>620</y>
+     <width>101</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
  <buttongroups>
   <buttongroup name="algorithmButtonGroup"/>
-  <buttongroup name="activeTeamNumButtonGroup"/>
   <buttongroup name="regionButtonGroup"/>
+  <buttongroup name="activeTeamNumButtonGroup"/>
  </buttongroups>
 </ui>

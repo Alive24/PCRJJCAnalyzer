@@ -2,3 +2,5 @@ dist
 build
 __pycache__
 tool/pics
+bigfun_ref_builder.py
+.idea/*

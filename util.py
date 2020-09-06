@@ -53,12 +53,7 @@ def cv_getMidPoint(incomingImage, refImage, method):
 
 def cv_getIndex(midPoint):
 # 根据midPoint坐标计算其顺序坐标（行列）
-
-    totalWidth = config.refImg['Width']
-    totalHeight = config.refImg['Height']
-    singleWidth = totalWidth / config.refImg['ColumnCount']
-    singleHeight = totalHeight / config.refImg['RowCount']
-    index = [int(midPoint[0]/singleWidth)+1, int(midPoint[1]/singleHeight)+1]
+    index = [int(midPoint[0]/config.refImg['UnitWidth'])+1, int(midPoint[1]/config.refImg['UnitWidth'])+1]
     return index
 
 
@@ -71,27 +66,42 @@ def query_gen_quick_key(true_id:str, user_id:int) -> str:
     qkey ^= mask
     return base64.b32encode(qkey.to_bytes(3, 'little')).decode()[:5]
 
-def query_getPickAvatar(id:int) -> QImage:
-    def getGridIndex(realId):
+def query_getPickAvatar(id:int, bigfun:bool) -> QImage:
+    def getGridIndex(realId, p2):
         index = [0, 0]
-        for i in range(config.refImg['RowCount']):
-            for j in range(config.refImg['ColumnCount']):
-                if data.refGrid[i][j]['id'] == realId:
+        for i in range(int(p2.height() / config.refImg['UnitWidth'])):
+            for j in range(int(p2.width() / config.refImg['UnitWidth'])):
+                if bigfun:
+                    refGrid = data.bigfunRefGrid
+                else:
+                    refGrid = data.refGrid
+                if isinstance(realId, str):
+                    realId = int(realId)
+                if refGrid[i][j]['id'] == realId:
                     index[0] = i + 1
                     index[1] = j + 1
                     return index
-    realId = id // 100
-    pickIndex = getGridIndex(realId)
-    pickX = (pickIndex[1] - 1) * (config.refImg['UnitWidth'] + config.refImg['GapWidth'])
-    pickY = (pickIndex[0] - 1) * (config.refImg['UnitWidth'] + config.refImg['GapWidth'])
-    pickW = config.refImg['UnitWidth']
-    pickH = config.refImg['UnitWidth']
+    if not bigfun:
+        id //= 100
     if getattr(sys, 'frozen', False):
         base_path = sys._MEIPASS
     else:
         base_path = os.path.abspath(".")
-    refImagePath = os.path.join(base_path, 'resource/refImage.png')
-    pickAvatar = QImage(refImagePath).copy(pickX, pickY, pickW, pickH)
+    if not bigfun:
+        refImagePath = os.path.join(base_path, 'resource/refImage.png')
+    else:
+        refImagePath = os.path.join(base_path, 'resource/bigfun.png')
+    p2 = QImage(refImagePath)
+    pickIndex = getGridIndex(id, p2)
+    if not bigfun:
+        pickX = (pickIndex[1] - 1) * (config.refImg['UnitWidth'] + config.refImg['GapWidth'])
+        pickY = (pickIndex[0] - 1) * (config.refImg['UnitWidth'] + config.refImg['GapWidth'])
+    else:
+        pickX = (pickIndex[1] - 1) * (config.refImg['UnitWidth'])
+        pickY = (pickIndex[0] - 1) * (config.refImg['UnitWidth'])
+    pickW = config.refImg['UnitWidth']
+    pickH = config.refImg['UnitWidth']
+    pickAvatar = p2.copy(pickX, pickY, pickW, pickH)
     return pickAvatar
 
 def config_loadConfig():

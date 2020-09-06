@@ -1,4 +1,8 @@
 # 根据参考图比对获得人物名称和作业网相应的id
+import json
+bigfun = open("./resource/bigfun.json", encoding='utf-8')
+bigfunRefGrid = json.loads(bigfun.read())
+bigfun.close()
 refGrid =[
     [#Row1
         {'name': '克莉丝提娜', 'id': 1071}, 

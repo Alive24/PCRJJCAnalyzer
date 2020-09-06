@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\gui.ui'
+# Form implementation generated from reading ui file './gui.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.0
 #
@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_PCRJJCAnalyzerGUI(object):
     def setupUi(self, PCRJJCAnalyzerGUI):
         PCRJJCAnalyzerGUI.setObjectName("PCRJJCAnalyzerGUI")
-        PCRJJCAnalyzerGUI.resize(825, 648)
+        PCRJJCAnalyzerGUI.resize(825, 647)
         self.team3RadioButton = QtWidgets.QRadioButton(PCRJJCAnalyzerGUI)
         self.team3RadioButton.setEnabled(True)
         self.team3RadioButton.setGeometry(QtCore.QRect(640, 50, 61, 31))
@@ -145,10 +145,10 @@ class Ui_PCRJJCAnalyzerGUI(object):
         self.HandleSelector.setGeometry(QtCore.QRect(20, 620, 81, 16))
         self.HandleSelector.setObjectName("HandleSelector")
         self.apiKeylineEdit = QtWidgets.QLineEdit(PCRJJCAnalyzerGUI)
-        self.apiKeylineEdit.setGeometry(QtCore.QRect(500, 620, 113, 20))
+        self.apiKeylineEdit.setGeometry(QtCore.QRect(600, 620, 113, 20))
         self.apiKeylineEdit.setObjectName("apiKeylineEdit")
         self.apiKeyLabel = QtWidgets.QLabel(PCRJJCAnalyzerGUI)
-        self.apiKeyLabel.setGeometry(QtCore.QRect(440, 620, 51, 16))
+        self.apiKeyLabel.setGeometry(QtCore.QRect(550, 620, 51, 16))
         self.apiKeyLabel.setObjectName("apiKeyLabel")
         self.queryStatusTag = QtWidgets.QLabel(PCRJJCAnalyzerGUI)
         self.queryStatusTag.setGeometry(QtCore.QRect(700, 50, 111, 31))
@@ -199,6 +199,12 @@ class Ui_PCRJJCAnalyzerGUI(object):
         self.setRegion4 = QtWidgets.QRadioButton(PCRJJCAnalyzerGUI)
         self.setRegion4.setGeometry(QtCore.QRect(460, 10, 51, 31))
         self.setRegion4.setObjectName("setRegion4")
+        self.searchServerLabel = QtWidgets.QLabel(PCRJJCAnalyzerGUI)
+        self.searchServerLabel.setGeometry(QtCore.QRect(380, 620, 54, 16))
+        self.searchServerLabel.setObjectName("searchServerLabel")
+        self.searchServerDrop = QtWidgets.QComboBox(PCRJJCAnalyzerGUI)
+        self.searchServerDrop.setGeometry(QtCore.QRect(440, 620, 101, 22))
+        self.searchServerDrop.setObjectName("searchServerDrop")
 
         self.retranslateUi(PCRJJCAnalyzerGUI)
         QtCore.QMetaObject.connectSlotsByName(PCRJJCAnalyzerGUI)
@@ -236,3 +242,4 @@ class Ui_PCRJJCAnalyzerGUI(object):
         self.configDialogButton.setText(_translate("PCRJJCAnalyzerGUI", "设定"))
         self.updateHandleSelectorListButton.setText(_translate("PCRJJCAnalyzerGUI", "刷新"))
         self.setRegion4.setText(_translate("PCRJJCAnalyzerGUI", "日服"))
+        self.searchServerLabel.setText(_translate("PCRJJCAnalyzerGUI", "搜索用API"))

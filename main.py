@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import json
+
 import util
 import copy
 import time
@@ -51,6 +52,7 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
         self.marginOffsetSpinBoxRight.valueChanged.connect(lambda targetValue: self.setCustomizedMarginOffset(2, mainGUI, targetValue))
         self.marginOffsetSpinBoxBottom.valueChanged.connect(lambda targetValue: self.setCustomizedMarginOffset(3, mainGUI, targetValue))
         self.marginOffsetPresetComboBox.activated[str].connect(lambda presetName: self.setToPresetMarginOffset(presetName))
+
     
     # 以下代码自PR#9后已弃用
     # def takeTestScreenshot(self, mainGUI):
@@ -94,18 +96,17 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
         self.close()
 
 class generateCharCandidateRunnable(QRunnable):
-    def __init__(self, charImageList, mainGUI, i, ):
+    def __init__(self, charImageList, mainGUI, i, bigfun):
         QRunnable.__init__(self)
         self.charImageList = charImageList
         self.w = mainGUI
         self.i = i
+        self.bigfun = bigfun
     def run(self):
         if getattr(sys, 'frozen', False):
             base_path = sys._MEIPASS
         else:
             base_path = os.path.abspath(".")
-        refImagePath = os.path.join(base_path, 'resource/refImage.png')
-        refImage = cv2.imread(refImagePath) # 读取参考图
         charIndexCandidateList = [[],[],[],[],[],[]]
         charCandidateList = [
                 {'name': '未知角色', 'id': 1000},
@@ -115,6 +116,13 @@ class generateCharCandidateRunnable(QRunnable):
                 {'name': '未知角色', 'id': 1000},
                 {'name': '未知角色', 'id': 1000},
         ]
+        if self.bigfun:
+            refImagePath = os.path.join(base_path, 'resource/refImage.png')
+            dataRef = data.refGrid
+        else:
+            refImagePath = os.path.join(base_path, 'resource/bigfun.png')
+            dataRef = data.bigfunRefGrid
+        refImage = cv2.imread(refImagePath)
         charIndexCandidateList[0] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCOEFF"))))
         charIndexCandidateList[1] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCOEFF_NORMED"))))
         charIndexCandidateList[2] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCORR"))))
@@ -122,7 +130,7 @@ class generateCharCandidateRunnable(QRunnable):
         charIndexCandidateList[4] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_SQDIFF"))))
         charIndexCandidateList[5] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_SQDIFF_NORMED"))))
         for j in range(6):
-            charCandidateList[j]= data.refGrid[(charIndexCandidateList[j][1]-1)][(charIndexCandidateList[j][0]-1)]
+            charCandidateList[j]= dataRef[(charIndexCandidateList[j][1]-1)][(charIndexCandidateList[j][0]-1)]
         charDropboxItemList = []
         for j in range(6):
             charDropboxItemList.append(charCandidateList[j]['name'])
@@ -184,42 +192,76 @@ class RequestRunnable(QRunnable):
     def run(self):
         self.w.queryStatusTag.setText('查询中')
         self.w.queryStatusTag.setStyleSheet("color:black")
-        headers = {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
-            'authorization': self.wApiKey,
-            'Content-Type': 'application/json'
-        }
-        r = requests.post(self.mUrl, json=self.mJson, headers=headers) or None
-        QThread.msleep(1000)
-        print(r)
-        try:
-            if self.w.activeTeamNum == 1:
-                self.w.queryResultStorageTeam1['rjson'] = r.json()
-                self.w.queryResultStorageTeam1['charDataList'] = self.w.charDataList
-            if self.w.activeTeamNum == 2:
-                self.w.queryResultStorageTeam2['rjson'] = r.json()
-                self.w.queryResultStorageTeam2['charDataList'] = self.w.charDataList
-            if self.w.activeTeamNum == 3:
-                self.w.queryResultStorageTeam3['rjson'] = r.json()
-                self.w.queryResultStorageTeam3['charDataList'] = self.w.charDataList
-            if len(r.json()['data']['result']) == 0:
-                self.w.queryStatusTag.setText('无结果！等待查询')
-                self.w.queryStatusTag.setStyleSheet("color:green")
-                return
-            for solution in r.json()['data']['result']:
-                QMetaObject.invokeMethod(self.w, "addSolution",
-                                        Qt.QueuedConnection,
-                                        Q_ARG(dict, solution))
-            self.w.queryStatusTag.setText('等待查询')
-            self.w.queryStatusTag.setStyleSheet("color:green")
-        except Exception as e:
+        if self.mJson is not None:
+            headers = {
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
+                'authorization': self.wApiKey,
+                'Content-Type': 'application/json'
+            }
+            r = requests.post(self.mUrl, json=self.mJson, headers=headers) or None
+            QThread.msleep(1000)
+            print(r)
+            rJson = r.json()
+            rJson["bigfun"] = False
             try:
-                self.w.queryStatusTag.setText('查询失败(%s)' % r.json()['code'])
+                if self.w.activeTeamNum == 1:
+                    self.w.queryResultStorageTeam1['rjson'] = rJson
+                    self.w.queryResultStorageTeam1['charDataList'] = self.w.charDataList
+                if self.w.activeTeamNum == 2:
+                    self.w.queryResultStorageTeam2['rjson'] = rJson
+                    self.w.queryResultStorageTeam2['charDataList'] = self.w.charDataList
+                if self.w.activeTeamNum == 3:
+                    self.w.queryResultStorageTeam3['rjson'] = rJson
+                    self.w.queryResultStorageTeam3['charDataList'] = self.w.charDataList
+                if len(r.json()['data']['result']) == 0:
+                    self.w.queryStatusTag.setText('无结果！等待查询')
+                    self.w.queryStatusTag.setStyleSheet("color:green")
+                    return
+                for solution in rJson['data']['result']:
+                    QMetaObject.invokeMethod(self.w, "addSolution",
+                                             Qt.QueuedConnection,
+                                             Q_ARG(dict, solution))
+                self.w.queryStatusTag.setText('等待查询')
+                self.w.queryStatusTag.setStyleSheet("color:green")
+            except Exception as e:
+                try:
+                    self.w.queryStatusTag.setText('查询失败(%s)' % r.json()['code'])
+                    self.w.queryStatusTag.setStyleSheet("color:red")
+                except:
+                    self.w.queryStatusTag.setText('查询失败(%s)' % "N/A")
+                    self.w.queryStatusTag.setStyleSheet("color:red")
+                return
+        else:
+            r = requests.get(self.mUrl) or None
+            QThread.msleep(1000)
+            print(r)
+            rJson = r.json()
+            rJson["bigfun"] = True
+            try:
+                if self.w.activeTeamNum == 1:
+                    self.w.queryResultStorageTeam1['rjson'] = rJson
+                    self.w.queryResultStorageTeam1['charDataList'] = self.w.charDataList
+                if self.w.activeTeamNum == 2:
+                    self.w.queryResultStorageTeam2['rjson'] = rJson
+                    self.w.queryResultStorageTeam2['charDataList'] = self.w.charDataList
+                if self.w.activeTeamNum == 3:
+                    self.w.queryResultStorageTeam3['rjson'] = rJson
+                    self.w.queryResultStorageTeam3['charDataList'] = self.w.charDataList
+                if r.json()['pagination']['total_count'] == 0:
+                    self.w.queryStatusTag.setText('无结果！等待查询')
+                    self.w.queryStatusTag.setStyleSheet("color:green")
+                    return
+                for solution in rJson["data"]:
+                    QMetaObject.invokeMethod(self.w, "addSolution",
+                                             Qt.QueuedConnection,
+                                             Q_ARG(dict, solution))
+                self.w.queryStatusTag.setText('等待查询')
+                self.w.queryStatusTag.setStyleSheet("color:green")
+            except Exception as e:
+                self.w.queryStatusTag.setText('查询失败')
                 self.w.queryStatusTag.setStyleSheet("color:red")
-            except:
-                self.w.queryStatusTag.setText('查询失败(%s)' % "N/A")
-                self.w.queryStatusTag.setStyleSheet("color:red")
-            return
+                return
+
 
 class GUIsolutionWidget(QWidget, Ui_solutionWidget):
     def __init__(self, parent=None, solution=None, mainGUI=None, buttonGroup=None):
@@ -285,21 +327,43 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
         __scenePickStarList = [QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene(), QGraphicsScene()]
         if solution['id'] == mainGUI.excludingSolutionIDList[self.teamNum-1]:
             self.findChild(QCheckBox, 'lockSolutionCheckBox_%s' % solution['id']).setChecked(True)
-        for i in range(5):
-            if solution["atk"][i]['star'] == 1:
-                __scenePickStarList[i].addText("一星")
-            if solution["atk"][i]['star'] == 2:
-                __scenePickStarList[i].addText("二星")
-            if solution["atk"][i]['star'] == 3:
-                __scenePickStarList[i].addText("三星")
-            if solution["atk"][i]['star'] == 4:
-                __scenePickStarList[i].addText("四星")
-            if solution["atk"][i]['star'] == 5:
-                __scenePickStarList[i].addText("五星")
-            if solution["atk"][i]['star'] == 6:
-                __scenePickStarList[i].addText("六星")
-        for pick in solution["atk"]:
-            __pickImageList.append(util.query_getPickAvatar(pick['id']))
+        bigfun = 'create_time' in solution.keys()
+        if not bigfun:
+            for i in range(5):
+                if solution["atk"][i]['star'] == 1:
+                    __scenePickStarList[i].addText("一星")
+                if solution["atk"][i]['star'] == 2:
+                    __scenePickStarList[i].addText("二星")
+                if solution["atk"][i]['star'] == 3:
+                    __scenePickStarList[i].addText("三星")
+                if solution["atk"][i]['star'] == 4:
+                    __scenePickStarList[i].addText("四星")
+                if solution["atk"][i]['star'] == 5:
+                    __scenePickStarList[i].addText("五星")
+                if solution["atk"][i]['star'] == 6:
+                    __scenePickStarList[i].addText("六星")
+        else:
+            for i in range(5):
+                if solution["win"][i]['level'] == 0:
+                    __scenePickStarList[i].addText("未登记")
+                if solution["win"][i]['level'] == 1:
+                    __scenePickStarList[i].addText("一星")
+                if solution["win"][i]['level'] == 2:
+                    __scenePickStarList[i].addText("二星")
+                if solution["win"][i]['level'] == 3:
+                    __scenePickStarList[i].addText("三星")
+                if solution["win"][i]['level'] == 4:
+                    __scenePickStarList[i].addText("四星")
+                if solution["win"][i]['level'] == 5:
+                    __scenePickStarList[i].addText("五星")
+                if solution["win"][i]['level'] == 6:
+                    __scenePickStarList[i].addText("六星")
+        if not bigfun:
+            for pick in solution["atk"]:
+                __pickImageList.append(util.query_getPickAvatar(pick['id'], False))
+        else:
+            for pick in solution["win"]:
+                __pickImageList.append(util.query_getPickAvatar(pick['role_id'], True))
         __pixPickImageList = [QtGui.QPixmap.fromImage(pickImage) for pickImage in __pickImageList]
         __itemPickImageList = [QGraphicsPixmapItem(pix) for pix in __pixPickImageList]
         for i in range(len(__scenePickImageList)):
@@ -308,7 +372,11 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
                 if self.teamNum == j:
                     continue
                 for k in range(5):
-                    if solution["atk"][i]['id'] == mainGUI.exclusionList[j][k]:
+                    if not bigfun:
+                        b = solution["atk"][i]['id'] == mainGUI.exclusionList[j][k]
+                    else:
+                        b = solution["win"][i]['id'] == mainGUI.exclusionList[j][k]
+                    if b:
                         __scenePickImageList[i].setBackgroundBrush(QtGui.QBrush(Qt.red))
         try:
             self.findChild(QGraphicsView, 'pick1Avatar_%s' % solution['id']).setScene(__scenePickImageList[0])
@@ -321,14 +389,24 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
             self.findChild(QGraphicsView, 'pick3Star_%s' % solution['id']).setScene(__scenePickStarList[2])
             self.findChild(QGraphicsView, 'pick4Star_%s' % solution['id']).setScene(__scenePickStarList[3])
             self.findChild(QGraphicsView, 'pick5Star_%s' % solution['id']).setScene(__scenePickStarList[4])
-            self.findChild(QLabel, 'upCount_%s' % solution['id']).setText(str(solution['up']))
-            self.findChild(QLabel, 'upCount_%s' % solution['id']).setStyleSheet("color:green")
-            self.findChild(QLabel, 'downCount_%s' % solution['id']).setText(str(solution['down']))
-            self.findChild(QLabel, 'downCount_%s' % solution['id']).setStyleSheet("color:red")
-            if solution['down'] != 0:
-                __likeDislikeRatioValue_Text = str(solution['up']/solution['down'])[:4]
+            if not bigfun:
+                self.findChild(QLabel, 'upCount_%s' % solution['id']).setText(str(solution['up']))
+                self.findChild(QLabel, 'downCount_%s' % solution['id']).setText(str(solution['down']))
             else:
-                __likeDislikeRatioValue_Text = "N/A"
+                self.findChild(QLabel, 'upCount_%s' % solution['id']).setText(str(solution['like']))
+                self.findChild(QLabel, 'downCount_%s' % solution['id']).setText(str(solution['dislike']))
+            self.findChild(QLabel, 'upCount_%s' % solution['id']).setStyleSheet("color:green")
+            self.findChild(QLabel, 'downCount_%s' % solution['id']).setStyleSheet("color:red")
+            if not bigfun:
+                if solution['down'] != 0:
+                    __likeDislikeRatioValue_Text = str(solution['up'] / solution['down'])[:4]
+                else:
+                    __likeDislikeRatioValue_Text = "N/A"
+            else:
+                if solution['dislike'] != 0:
+                    __likeDislikeRatioValue_Text = str(solution['like'] / solution['dislike'])[:4]
+                else:
+                    __likeDislikeRatioValue_Text = "N/A"
             self.findChild(QLabel, 'likeDislikeRatioValue_%s' % solution['id']).setText(__likeDislikeRatioValue_Text)
             for comment in list(reversed(solution['comment'])):
                 self.findChild(QTextBrowser, 'commentBrowser_%s' % solution['id']).append("(%s) %s" % (comment['date'][:10], comment['msg'])) 
@@ -343,6 +421,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
     def __init__(self, parent=None):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
+        self.searchServerDrop.addItems(["pcrdfans.com", "bigfun"])
+        self.searchServerDrop.currentIndexChanged.connect(lambda idx: self.apiKeylineEdit.setEnabled(not idx))
         self.appExceptionHandler = ExceptHookHandler(self, logFile=os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "log.txt"))
         self.setWindowTitle('PCRJJCAnalyzer-v0.1.1-beta1')
         self.exclusionList  = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
@@ -561,11 +641,18 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         try:
             if not targetQueryResultStorageRJson:
                 return
-            if targetQueryResultStorageRJson['data']['result'] == 0:
-                self.queryStatusTag.setText('无结果！等待查询')
-                self.queryStatusTag.setStyleSheet("color:green")
+
+            def noResult(obj):
+                obj.queryStatusTag.setText('无结果！等待查询')
+                obj.queryStatusTag.setStyleSheet("color:green")
+            if 'bigfun' in targetQueryResultStorageRJson.keys():
+                if (targetQueryResultStorageRJson['bigfun'] and targetQueryResultStorageRJson['pagination']['total_count'] == 0) or (not targetQueryResultStorageRJson['bigfun'] and targetQueryResultStorageRJson['data']['result'] == 0):
+                    noResult(self)
+                    return
+            elif targetQueryResultStorageRJson['data']['result'] == 0:
+                noResult(self)
                 return
-            for solution in targetQueryResultStorageRJson['data']['result']:
+            for solution in targetQueryResultStorageRJson:
                 QMetaObject.invokeMethod(self, "addSolution",
                                         Qt.QueuedConnection,
                                         Q_ARG(dict, solution))
@@ -601,17 +688,20 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                 if self.char5CandidateList[i]['name'] == candidateName:
                     self.charDataList[4] = self.char5CandidateList[i]
         raw_id_list = [charData['id'] for charData in self.charDataList]
-        id_list = [ x * 100 + 1 for x in raw_id_list ]
-        payload = {
-            "_sign": "a", 
-            "def": id_list, 
-            "nonce": "a", 
-            "page": 1, 
-            "sort": 1, 
-            "ts": int(time.time()), 
-            "region": config_dict['region']
-        }        
-        queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
+        if self.apiKeylineEdit.isEnabled():
+            id_list = [x * 100 + 1 for x in raw_id_list]
+            payload = {
+                "_sign": "a",
+                "def": id_list,
+                "nonce": "a",
+                "page": 1,
+                "sort": 1,
+                "ts": int(time.time()),
+                "region": config_dict['region']
+            }
+            queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
+        else:
+            queryRunnable = RequestRunnable("https://www.bigfun.cn/api/client/web?method=findLineUp&page=1&order=like&roles=" + ','.join([str(x) for x in raw_id_list]), None, self, '')
         QThreadPool.globalInstance().start(queryRunnable)
 
     def onHandleSelect(self, handleTitle):
@@ -744,20 +834,23 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.showChars(0)
         self.parseChars()
         raw_id_list = [charData['id'] for charData in self.charDataList]
-        id_list = [ x * 100 + 1 for x in raw_id_list ]
-        payload = {
-            "_sign": "a", 
-            "def": id_list, 
-            "nonce": "a", 
-            "page": 1, 
-            "sort": 1, 
-            "ts": int(time.time()), 
-            "region": config_dict['region']
-        }        
-        queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
+        if self.apiKeylineEdit.isEnabled():
+            id_list = [x * 100 + 1 for x in raw_id_list]
+            payload = {
+                "_sign": "a",
+                "def": id_list,
+                "nonce": "a",
+                "page": 1,
+                "sort": 1,
+                "ts": int(time.time()),
+                "region": config_dict['region']
+            }
+            queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
+        else:
+            queryRunnable = RequestRunnable("https://www.bigfun.cn/api/client/web?method=findLineUp&page=1&order=like&roles=" + ','.join([str(x) for x in raw_id_list]), None, self, '')
         QThreadPool.globalInstance().start(queryRunnable)
         for i in range(5):
-            completeDropboxRunnable = generateCharCandidateRunnable(self.charImageList, self, i)
+            completeDropboxRunnable = generateCharCandidateRunnable(self.charImageList, self, i, self.apiKeylineEdit.isEnabled())
             QThreadPool.globalInstance().start(completeDropboxRunnable)
     @pyqtSlot(dict)
     def addSolution(self, solution):
@@ -788,12 +881,17 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             base_path = sys._MEIPASS
         else:
             base_path = os.path.abspath(".")
-        refImagePath = os.path.join(base_path, 'resource/refImage.png')
-        refImage = cv2.imread(refImagePath) # 读取参考图
+        if self.apiKeylineEdit.isEnabled():
+            refImagePath = os.path.join(base_path, 'resource/refImage.png')
+            dataRef = data.refGrid
+        else:
+            refImagePath = os.path.join(base_path, 'resource/bigfun.png')
+            dataRef = data.bigfunRefGrid
+        refImage = cv2.imread(refImagePath)  # 读取参考图
         for i in range(len(self.charImageList)):
             charNum = i+1
             charIndex = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[i], refImage, eval("cv2.%s" % self.algorithm )))) # 计算出目标角色在参考图中的坐标位置（行与列）
-            self.charDataList[i] = data.refGrid[(charIndex[1]-1)][(charIndex[0]-1)]
+            self.charDataList[i] = dataRef[(charIndex[1] - 1)][(charIndex[0] - 1)]
             charName = self.charDataList[i]['name']
             print(charNum, charName, charIndex)
         self.char1Dropbox.addItem(self.charDataList[0]['name'])

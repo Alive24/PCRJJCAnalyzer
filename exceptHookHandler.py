@@ -55,8 +55,8 @@ class ExceptHookHandler(object):
         sys.__excepthook__(excType, excValue, tb)     
         
         err_msg = ''.join(traceback.format_exception(excType, excValue, tb))
-        err_msg += '\n Your App happen an exception, please contact administration.'
+        err_msg += '\nPCRJJCAnalyzer遇到了意料之外的错误。请在反馈时附上本对话框截图。'
         # Here collecting traceback and some log files to be sent for debugging.
         # But also possible to handle the error and continue working.
-        dlg = QMessageBox.information(self.mainGUI, "Error", err_msg)
+        QMessageBox.information(self.__mainGUI, "Error", err_msg)
         # dlg = wx.MessageDialog(None, err_msg, 'Administration', wx.OK | wx.ICON_ERROR)

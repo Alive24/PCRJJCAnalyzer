@@ -360,6 +360,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.setRegion1.clicked.connect(self.setRegionOnClicked)
         self.setRegion2.clicked.connect(self.setRegionOnClicked)
         self.setRegion3.clicked.connect(self.setRegionOnClicked)
+        self.setRegion4.clicked.connect(self.setRegionOnClicked)
         self.TM_CCOEFF.clicked.connect(self.setTMAlgorithmOnClicked)
         self.TM_CCOEFF_NORMED.clicked.connect(self.setTMAlgorithmOnClicked)
         self.TM_CCORR.clicked.connect(self.setTMAlgorithmOnClicked)
@@ -646,6 +647,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                 self.region = 2
             if clickedRadioButton.objectName() == "setRegion3":
                 self.region = 3
+            if clickedRadioButton.objectName() == "setRegion4":
+                self.region = 4
     def recognizeAndSolve(self, teamNum:[0, 1, 2, 3, 4]):
         self.exclusionCheckBoxButtonGroup = QButtonGroup()
         self.char1Dropbox.clear()

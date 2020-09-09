@@ -269,13 +269,21 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
 
     def bookmarkSolutionCheckBoxHandler(self, bookmarkSolutionCheckBox, solution, mainGUI):
         if bookmarkSolutionCheckBox.isChecked():
+            self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+            self.setStyleSheet('background-color: aquamarine')
             util.solution_appendToBookmarkList(solution, mainGUI)
         else:
+            self.setAttribute(QtCore.Qt.WA_StyledBackground, False)
+            self.setStyleSheet('background-color: None')
             util.solution_removeFromBookmarkList(solution, mainGUI)
     def ruleOutSolutionCheckBoxHandler(self, ruleOutSolutionCheckBox, solution, mainGUI):
         if ruleOutSolutionCheckBox.isChecked():
+            self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+            self.setStyleSheet('background-color: pink')
             util.solution_appendToRuleOutList(solution, mainGUI)
         else:
+            self.setAttribute(QtCore.Qt.WA_StyledBackground, False)
+            self.setStyleSheet('background-color: None')
             util.solution_removeFromRuleOutList(solution, mainGUI)
     def renderSolution(self, solution, mainGUI, buttonGroup):
         __pickImageList = []
@@ -410,8 +418,6 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.char3Dropbox.activated[str].connect(lambda candidateName, charNum=3: self.onCharCandidateSelect(candidateName, charNum))
         self.char4Dropbox.activated[str].connect(lambda candidateName, charNum=4: self.onCharCandidateSelect(candidateName, charNum))
         self.char5Dropbox.activated[str].connect(lambda candidateName, charNum=5: self.onCharCandidateSelect(candidateName, charNum))
-        self.queryStatusTag.setText("请选择句柄")
-        self.queryStatusTag.setStyleSheet("color:red")
         self.configDialogButton.clicked.connect(self.showConfigDialog)
     def initializeHandleSelector(self):
         emulator_lst = dict()
@@ -437,6 +443,11 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.handleSelectorComboBox.addItems(self.titleList)
         if len(self.titleList) == 1:
             self.handle = list(emulator_lst.keys())[0]
+            self.queryStatusTag.setText('等待查询')
+            self.queryStatusTag.setStyleSheet("color:green")
+        else:
+            self.queryStatusTag.setText("请选择句柄")
+            self.queryStatusTag.setStyleSheet("color:red")
     def showConfigDialog(self):
         self.configDialog = GUIConfigDialogWidget(mainGUI=self)
         self.configDialog.show()

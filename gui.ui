@@ -70,22 +70,6 @@
     <string notr="true">activeTeamNumButtonGroup</string>
    </attribute>
   </widget>
-  <widget class="QPushButton" name="pushButton">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>10</y>
-     <width>91</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>自有角色限制</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="regionSelector">
    <property name="geometry">
     <rect>
@@ -308,22 +292,6 @@
    </property>
    <property name="text">
     <string>识别求解</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="manualSetChar">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>10</y>
-     <width>91</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>手动设定阵容</string>
    </property>
   </widget>
   <widget class="QRadioButton" name="TM_CCOEFF_NORMED">
@@ -677,12 +645,25 @@
     <string>日服</string>
    </property>
   </widget>
+  <widget class="QCheckBox" name="globalHideExclusionRuledOutSwitchCheckBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>10</y>
+     <width>201</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>隐藏不可用或已排除的作业</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="algorithmButtonGroup"/>
   <buttongroup name="activeTeamNumButtonGroup"/>
+  <buttongroup name="algorithmButtonGroup"/>
   <buttongroup name="regionButtonGroup"/>
  </buttongroups>
 </ui>

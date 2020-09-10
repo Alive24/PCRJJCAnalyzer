@@ -99,11 +99,23 @@ def config_loadConfig():
         os.makedirs(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer"))
     try:
         config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'r',encoding='utf-8')
-        config_dict = json.load(config_file)
+        config_dict_toLoad = json.load(config_file)
+        config_dict = {
+            'globalExclusionList': [],
+            'globalHideExclusionRuledOutSwitch': False,
+            'apiKey': '',
+            'region': 1,
+            'marginOffsetMode': '雷电模拟器',
+            'effectiveMarginOffSet': [0, 32, 42, 0]
+        }
+        for key in list(config_dict_toLoad.keys()):
+            config_dict[key] = config_dict_toLoad[key]
         config_file.close()
     except Exception as e:
         print(e)
         config_dict = {
+            'globalExclusionList': [],
+            'globalHideExclusionRuledOutSwitch': False,
             'apiKey': '',
             'region': 1,
             'marginOffsetMode': '雷电模拟器',
@@ -181,4 +193,11 @@ def solution_removeFromRuleOutList(solution, mainGUI):
     ruleOutList_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "ruleOutList.json"),'w',encoding='utf-8')
     json.dump(mainGUI.ruleOutList, ruleOutList_file, ensure_ascii=False)
     ruleOutList_file.close()
+    return
+
+def refData_getNameByRawID(rawID):
+    for row in data.refGrid:
+        for entry in row:
+            if entry['id'] == rawID:
+                return entry['name']
     return

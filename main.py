@@ -15,7 +15,7 @@ import requests
 import win32gui
 import asyncio
 import quamash
-from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QLabel, QWidget, QTextBrowser, QMessageBox, QButtonGroup, QCheckBox, QDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QLabel, QWidget, QTextBrowser, QMessageBox, QButtonGroup, QCheckBox, QDialog, QMenu, QAction
 from PyQt5 import QtGui, QtCore, QtNetwork
 from PyQt5.QtCore import QRunnable, QThreadPool, pyqtSlot, QThread, QMetaObject, Qt, Q_ARG
 from gui import Ui_PCRJJCAnalyzerGUI
@@ -180,6 +180,12 @@ class RequestRunnable(QRunnable):
         self.mJson = json
         self.w = mainGUI
         self.wApiKey = apiKey
+    
+    def getIsInRuleOutList(self, solution, mainGUI):
+        for ruledOutSolution in mainGUI.ruleOutList:
+            if solution['id'] == ruledOutSolution['id']:
+                return True
+        return False
 
     def run(self):
         self.w.queryStatusTag.setText('查询中')
@@ -190,7 +196,7 @@ class RequestRunnable(QRunnable):
             'Content-Type': 'application/json'
         }
         r = requests.post(self.mUrl, json=self.mJson, headers=headers) or None
-        QThread.msleep(1000)
+        QThread.msleep(300)
         print(r)
         try:
             if self.w.activeTeamNum == 1:
@@ -207,6 +213,13 @@ class RequestRunnable(QRunnable):
                 self.w.queryStatusTag.setStyleSheet("color:green")
                 return
             for solution in r.json()['data']['result']:
+                if config_dict['globalHideExclusionRuledOutSwitch'] == True:
+                    if self.getIsInRuleOutList(solution, self.w):
+                        continue                
+                    __solutionPickIDSet = set([item['id'] for item in solution['atk']])
+                    __intersection = set(config_dict['globalExclusionList']) & __solutionPickIDSet
+                    if len(__intersection) != 0:
+                        continue
                 QMetaObject.invokeMethod(self.w, "addSolution",
                                         Qt.QueuedConnection,
                                         Q_ARG(dict, solution))
@@ -214,6 +227,7 @@ class RequestRunnable(QRunnable):
             self.w.queryStatusTag.setStyleSheet("color:green")
         except Exception as e:
             try:
+                print(e)
                 self.w.queryStatusTag.setText('查询失败(%s)' % r.json()['code'])
                 self.w.queryStatusTag.setStyleSheet("color:red")
             except:
@@ -256,6 +270,38 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
         self.ruleOutSolutionCheckBox.setObjectName('ruleOutSolutionCheckBox_%s' % solution['id'])
         buttonGroup.addButton(self.lockSolutionCheckBox)
         self.renderSolution(solution, mainGUI, buttonGroup)
+        for i in range(5):
+            self.createContextMenu(solution, i+1, mainGUI)
+    def createContextMenu(self, solution, pickIndex, mainGUI):
+        def showContextMenu(self):
+            __contextMenu.move(QtGui.QCursor().pos())
+            __contextMenu.show()
+        def actionHandler(checked, __pickID, mainGUI):
+            if checked:
+                mainGUI.exclusionList[0].append(__pickID)
+                config_dict['globalExclusionList'] == mainGUI.exclusionList[0]
+                util.config_writeConfig(config_dict)
+                __targetAvartar.setStyleSheet('background-color: orange')
+            else:
+                for i in range(len(mainGUI.exclusionList[0])):
+                    if mainGUI.exclusionList[0][i] == __pickID:
+                        mainGUI.exclusionList[0].pop(i)
+                        config_dict['globalExclusionList'] == mainGUI.exclusionList[0]
+                        util.config_writeConfig(config_dict)
+                __targetAvartar.setStyleSheet('background-color: None')
+        __targetAvartar = self.findChild(QGraphicsView, 'pick%sAvatar_%s' % (pickIndex, solution['id']))
+        __targetAvartar.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        __targetAvartar.customContextMenuRequested.connect(showContextMenu)
+        # 创建QMenu
+        __contextMenu = QMenu(self)
+        __pickID = solution['atk'][pickIndex-1]['id']
+        __pickRawID = __pickID // 100
+        __pickName = util.refData_getNameByRawID(__pickRawID)
+        __addToLockedListAction = QAction('添加%s到未解锁角色列表' % __pickName, __contextMenu, checkable=True)
+        if __pickID in mainGUI.exclusionList[0]:
+            __addToLockedListAction.setChecked(True)
+        __addToLockedListAction.triggered.connect(lambda checked, __pickID=__pickID, mainGUI=mainGUI: actionHandler(checked, __pickID, mainGUI))
+        __contextMenu.addAction(__addToLockedListAction)
     def getIsInBookmarkList(self, solution, mainGUI):
         for bookmarkedSolution in mainGUI.bookmarkList:
             if solution['id'] == bookmarkedSolution['id']:
@@ -315,9 +361,16 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
             for j in range(4):
                 if self.teamNum == j:
                     continue
-                for k in range(5):
-                    if solution["atk"][i]['id'] == mainGUI.exclusionList[j][k]:
-                        __scenePickImageList[i].setBackgroundBrush(QtGui.QBrush(Qt.red))
+                if j == 0:
+                    for k in range(len(mainGUI.exclusionList[j])):
+                        if solution["atk"][i]['id'] == mainGUI.exclusionList[j][k]:
+                            self.findChild(QGraphicsView, 'pick%sAvatar_%s' % (i+1, solution['id'])).setStyleSheet('background-color: orange')
+                else:
+                    for k in range(5):
+                        if j == 0:
+                            continue
+                        if solution["atk"][i]['id'] == mainGUI.exclusionList[j][k]:
+                            __scenePickImageList[i].setBackgroundBrush(QtGui.QBrush(Qt.red))
         try:
             self.findChild(QGraphicsView, 'pick1Avatar_%s' % solution['id']).setScene(__scenePickImageList[0])
             self.findChild(QGraphicsView, 'pick2Avatar_%s' % solution['id']).setScene(__scenePickImageList[1])
@@ -352,8 +405,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
         self.appExceptionHandler = ExceptHookHandler(self, logFile=os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "log.txt"))
-        self.setWindowTitle('PCRJJCAnalyzer-v0.1.1-beta2')
-        self.exclusionList  = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+        self.setWindowTitle('PCRJJCAnalyzer-v0.1.2-beta1')
+        self.exclusionList  = [[], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         self.excludingSolutionIDList = ['','','']
         self.exclusionCheckBoxButtonGroup = QButtonGroup()
         self.resetExclusionCurrentTeamButton.clicked.connect(lambda: self.resetExclusionList(self.activeTeamNum))
@@ -419,6 +472,18 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.char4Dropbox.activated[str].connect(lambda candidateName, charNum=4: self.onCharCandidateSelect(candidateName, charNum))
         self.char5Dropbox.activated[str].connect(lambda candidateName, charNum=5: self.onCharCandidateSelect(candidateName, charNum))
         self.configDialogButton.clicked.connect(self.showConfigDialog)
+        self.exclusionList[0] = config_dict['globalExclusionList']
+        self.globalHideExclusionRuledOutSwitchCheckBox.setChecked(config_dict['globalHideExclusionRuledOutSwitch'])
+        self.globalHideExclusionRuledOutSwitchCheckBox.stateChanged.connect(self.globalHideExclusionRuledOutSwitchCheckBoxHandler)
+    def getIsInRuleOutList(self, solution):
+        for ruledOutSolution in self.ruleOutList:
+            if solution['id'] == ruledOutSolution['id']:
+                return True
+        return False
+    def globalHideExclusionRuledOutSwitchCheckBoxHandler(self, globalHideExclusionRuledOutSwitchCheckBox):
+        config_dict['globalHideExclusionRuledOutSwitch'] = self.globalHideExclusionRuledOutSwitchCheckBox.isChecked()
+        util.config_writeConfig(config_dict)
+        self.switchActiveTeam(targetTeamNum=self.activeTeamNum, forced=True)
     def initializeHandleSelector(self):
         emulator_lst = dict()
         emulator_hwnd = ["subWin", "canvasWin"] # subWin: nox, ldplayer | canvasWin: mumu
@@ -458,7 +523,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.queryResultStorageTeam1 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
         self.queryResultStorageTeam2 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
         self.queryResultStorageTeam3 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
-        self.exclusionList  = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+        self.exclusionList  = [[], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         self.excludingSolutionIDList = ['','','']
         self.char1Dropbox.clear()
         self.char2Dropbox.clear()
@@ -468,7 +533,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.switchActiveTeam(targetTeamNum=self.activeTeamNum, forced=True)
     def resetExclusionList(self, teamNumToReset:[-1, 0, 1, 2, 3]):
         if teamNumToReset == -1:
-            self.exclusionList  = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+            self.exclusionList  = [[], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
             self.excludingSolutionIDList = ['','','']
         if teamNumToReset in [1, 2, 3]:
             self.exclusionList[teamNumToReset] = [0, 0, 0, 0, 0]
@@ -577,6 +642,13 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                 self.queryStatusTag.setStyleSheet("color:green")
                 return
             for solution in targetQueryResultStorageRJson['data']['result']:
+                if config_dict['globalHideExclusionRuledOutSwitch'] == True:
+                    if self.getIsInRuleOutList(solution):
+                        continue                
+                    __solutionPickIDSet = set([item['id'] for item in solution['atk']])
+                    __intersection = set(config_dict['globalExclusionList']) & __solutionPickIDSet
+                    if len(__intersection) != 0:
+                        continue
                 QMetaObject.invokeMethod(self, "addSolution",
                                         Qt.QueuedConnection,
                                         Q_ARG(dict, solution))

@@ -51,7 +51,30 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
         self.marginOffsetSpinBoxRight.valueChanged.connect(lambda targetValue: self.setCustomizedMarginOffset(2, mainGUI, targetValue))
         self.marginOffsetSpinBoxBottom.valueChanged.connect(lambda targetValue: self.setCustomizedMarginOffset(3, mainGUI, targetValue))
         self.marginOffsetPresetComboBox.activated[str].connect(lambda presetName: self.setToPresetMarginOffset(presetName))
-    
+        if config_dict['customizedApi'] == False:
+            self.defaultApiUrlRadioButton.setChecked(True)
+            self.customizedApiUrlLineEdit.setDisabled(True)
+        else:
+            self.customizedApiUrlRadioButton.setChecked(True)
+        self.defaultApiUrlRadioButton.clicked.connect(self.setApiModeOnClicked)
+        self.customizedApiUrlRadioButton.clicked.connect(self.setApiModeOnClicked)
+        self.customizedApiUrlLineEdit.textChanged.connect(self.customizedApirUrlLineEditHandler)
+    def setApiModeOnClicked(self):
+        clickedRadioButton = self.sender()
+        if clickedRadioButton.isChecked():
+            if clickedRadioButton.objectName() == "defaultApiUrlRadioButton":
+                config_dict['customizedApi'] = False
+                self.customizedApiUrlLineEdit.setDisabled(True)
+            if clickedRadioButton.objectName() == "customizedApiUrlRadioButton":
+                config_dict['customizedApi'] = True
+                self.customizedApiUrlLineEdit.setDisabled(False)
+        try:
+            util.config_writeConfig(config_dict)
+        except Exception as e:
+            print(e)
+    def customizedApirUrlLineEditHandler(self,customizedApiUrl):
+        config_dict['customizedApiUrl'] = customizedApiUrl
+        util.config_writeConfig(config_dict)
     # 以下代码自PR#9后已弃用
     # def takeTestScreenshot(self, mainGUI):
     #     screenshot = screen.grabWindow(mainGUI.handle).toImage()
@@ -405,7 +428,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
         self.appExceptionHandler = ExceptHookHandler(self, logFile=os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "log.txt"))
-        self.setWindowTitle('PCRJJCAnalyzer-v0.1.2-beta1')
+        self.setWindowTitle('PCRJJCAnalyzer-v0.1.3-beta1')
         self.exclusionList  = [[], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         self.excludingSolutionIDList = ['','','']
         self.exclusionCheckBoxButtonGroup = QButtonGroup()
@@ -837,7 +860,10 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             "ts": int(time.time()), 
             "region": config_dict['region']
         }        
-        queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
+        apiUrl = "https://api.pcrdfans.com/x/v1/search"
+        if config_dict['customizedApi'] == True:
+            apiUrl = config_dict['customizedApiUrl']
+        queryRunnable = RequestRunnable(apiUrl, payload, self, self.apiKey)
         QThreadPool.globalInstance().start(queryRunnable)
         for i in range(5):
             completeDropboxRunnable = generateCharCandidateRunnable(self.charImageList, self, i)

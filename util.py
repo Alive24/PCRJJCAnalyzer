@@ -106,7 +106,9 @@ def config_loadConfig():
             'apiKey': '',
             'region': 1,
             'marginOffsetMode': '雷电模拟器',
-            'effectiveMarginOffSet': [0, 32, 42, 0]
+            'effectiveMarginOffSet': [0, 32, 42, 0],
+            'customizedApi': False,
+            'customizedApiUrl': ''
         }
         for key in list(config_dict_toLoad.keys()):
             config_dict[key] = config_dict_toLoad[key]
@@ -119,7 +121,9 @@ def config_loadConfig():
             'apiKey': '',
             'region': 1,
             'marginOffsetMode': '雷电模拟器',
-            'effectiveMarginOffSet': [0, 32, 42, 0]
+            'effectiveMarginOffSet': [0, 32, 42, 0],
+            'customizedApi': False,
+            'customizedApiUrl': ''
         }
         config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'w',encoding='utf-8')
         json.dump(config_dict,config_file,ensure_ascii=False)

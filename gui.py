@@ -191,6 +191,7 @@ class Ui_PCRJJCAnalyzerGUI(object):
         self.setRegion4 = QtWidgets.QRadioButton(PCRJJCAnalyzerGUI)
         self.setRegion4.setGeometry(QtCore.QRect(460, 10, 51, 31))
         self.setRegion4.setObjectName("setRegion4")
+        self.regionButtonGroup.addButton(self.setRegion4)
         self.globalHideExclusionRuledOutSwitchCheckBox = QtWidgets.QCheckBox(PCRJJCAnalyzerGUI)
         self.globalHideExclusionRuledOutSwitchCheckBox.setGeometry(QtCore.QRect(20, 10, 201, 31))
         self.globalHideExclusionRuledOutSwitchCheckBox.setObjectName("globalHideExclusionRuledOutSwitchCheckBox")

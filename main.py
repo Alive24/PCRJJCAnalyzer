@@ -51,6 +51,7 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
         self.marginOffsetSpinBoxRight.valueChanged.connect(lambda targetValue: self.setCustomizedMarginOffset(2, mainGUI, targetValue))
         self.marginOffsetSpinBoxBottom.valueChanged.connect(lambda targetValue: self.setCustomizedMarginOffset(3, mainGUI, targetValue))
         self.marginOffsetPresetComboBox.activated[str].connect(lambda presetName: self.setToPresetMarginOffset(presetName))
+        self.customizedApiUrlLineEdit.setText(config_dict['customizedApiUrl'])
         if config_dict['customizedApi'] == False:
             self.defaultApiUrlRadioButton.setChecked(True)
             self.customizedApiUrlLineEdit.setDisabled(True)
@@ -509,7 +510,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.switchActiveTeam(targetTeamNum=self.activeTeamNum, forced=True)
     def initializeHandleSelector(self):
         emulator_lst = dict()
-        emulator_hwnd = ["subWin", "canvasWin"] # subWin: nox, ldplayer | canvasWin: mumu
+        emulator_hwnd = ["subWin", "canvasWin", "BlueStacksApp"] # subWin: nox, ldplayer | canvasWin: mumu
         def check_emulator_window(hwnd, p):
             if win32gui.GetClassName(hwnd) in emulator_hwnd and hwnd not in emulator_lst:
                 emulator_lst.update({hwnd: p})
@@ -716,8 +717,11 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             "sort": 1, 
             "ts": int(time.time()), 
             "region": config_dict['region']
-        }        
-        queryRunnable = RequestRunnable("https://api.pcrdfans.com/x/v1/search", payload, self, self.apiKey)
+        }
+        apiUrl = "https://api.pcrdfans.com/x/v1/search"
+        if config_dict['customizedApi'] == True:
+            apiUrl = config_dict['customizedApiUrl']
+        queryRunnable = RequestRunnable(apiUrl, payload, self, self.apiKey)
         QThreadPool.globalInstance().start(queryRunnable)
 
     def onHandleSelect(self, handleTitle):

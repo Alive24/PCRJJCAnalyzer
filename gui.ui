@@ -644,6 +644,9 @@
    <property name="text">
     <string>日服</string>
    </property>
+   <attribute name="buttonGroup">
+    <string notr="true">regionButtonGroup</string>
+   </attribute>
   </widget>
   <widget class="QCheckBox" name="globalHideExclusionRuledOutSwitchCheckBox">
    <property name="geometry">

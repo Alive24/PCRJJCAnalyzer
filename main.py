@@ -222,6 +222,8 @@ class RequestRunnable(QRunnable):
         r = requests.post(self.mUrl, json=self.mJson, headers=headers) or None
         QThread.msleep(300)
         print(r)
+        self.w.lastResponseJson = r.json()
+        self.w.lastRequestJson = self.mJson
         try:
             if self.w.activeTeamNum == 1:
                 self.w.queryResultStorageTeam1['rjson'] = r.json()

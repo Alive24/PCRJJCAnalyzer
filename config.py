@@ -19,21 +19,21 @@ charLocationRatioConfig_CurrentEnemyTeam = {
 }
 
 charLocationRatioConfig_HistoryTeamOne = {
-    'y': 0.265,
+    'y': 0.277778,
     'w': 0.058583784,
     'h': 0.10459542,
     'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]
 }
 
 charLocationRatioConfig_HistoryTeamTwo = {
-    'y': 0.4773333333,
+    'y': 0.483333,
     'w': 0.058583784,
     'h': 0.10459542,
     'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]
 }
 
 charLocationRatioConfig_HistoryTeamThree = {
-    'y': 0.69,
+    'y': 0.683333,
     'w': 0.058583784,
     'h': 0.10459542,
     'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]

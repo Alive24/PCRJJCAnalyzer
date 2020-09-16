@@ -1,6 +1,7 @@
 import cv2
 import json
 import copy
+import logging
 import numpy as np
 import win32gui
 import os
@@ -11,6 +12,8 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import *
 import sys
 import data
+
+global_logger = logging.getLogger()
 hwnd_title = dict()
 quick_key_dic = {} 
 default_refImageParams = {
@@ -95,7 +98,7 @@ default_dict = {
         }
 }
 
-def util_getRefImageParams():
+def config_getRefImageParams():
     refImageParams = copy.deepcopy(default_refImageParams)
     if getattr(sys, 'frozen', False):
         base_path = sys._MEIPASS
@@ -150,9 +153,8 @@ def cv_getMidPoint(incomingImage, refImage, method):
     midPoint = (top_left[0] + 0.5 * w, top_left[1] + 0.5 *h)
     return midPoint
 
-def cv_getIndex(midPoint):
+def cv_getIndex(midPoint, refImageParams):
 # 根据midPoint坐标计算其顺序坐标（行列）
-    refImageParams = util_getRefImageParams()
     index = [int(midPoint[0]/refImageParams['unitWidth'])+1, int(midPoint[1]/refImageParams['unitHeight'])+1]
     return index
 
@@ -166,8 +168,7 @@ def query_gen_quick_key(true_id:str, user_id:int) -> str:
     qkey ^= mask
     return base64.b32encode(qkey.to_bytes(3, 'little')).decode()[:5]
 
-def query_getPickAvatar(id:int) -> QImage:
-    refImageParams = util_getRefImageParams()
+def query_getPickAvatar(id:int, refImageParams:dict) -> QImage:
     def getGridIndex(realId):
         index = [0, 0]
         for i in range(refImageParams['rowCount']):
@@ -200,12 +201,30 @@ def config_loadConfig():
             config_dict[key] = config_dict_toLoad[key]
         config_file.close()
     except Exception as e:
-        print(e)
+        global_logger.exception("config_loadConfig()错误")
         config_dict = copy.deepcopy(default_dict)
         config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'w',encoding='utf-8')
         json.dump(config_dict,config_file,ensure_ascii=False)
         config_file.close()
     return config_dict
+
+def config_loadRefImageParams():
+    if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer")):
+        os.makedirs(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer"))
+    try:
+        refImageParams_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "refImageParams.json"),'r',encoding='utf-8')
+        refImageParams_toLoad = json.load(refImageParams_file)
+        refImageParams = copy.deepcopy(default_refImageParams)
+        for key in list(refImageParams_toLoad.keys()):
+            refImageParams[key] = refImageParams_toLoad[key]
+        refImageParams_file.close()
+    except Exception as e:
+        global_logger.exception("config_loadRefImageParams()错误")
+        refImageParams = copy.deepcopy(default_refImageParams)
+        refImageParams_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "refImageParams.json"),'w',encoding='utf-8')
+        json.dump(refImageParams,refImageParams_file,ensure_ascii=False)
+        refImageParams_file.close()
+    return refImageParams
 
 def config_writeConfig(config_dict):
     try:
@@ -213,11 +232,24 @@ def config_writeConfig(config_dict):
         json.dump(config_dict,config_file,ensure_ascii=False)
         config_file.close()
     except Exception as e:
-        print(e)
+        global_logger.exception("config_writeConfig()错误")
         config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'w',encoding='utf-8')
         json.dump(config_dict,config_file,ensure_ascii=False)
         config_file.close()
     return
+
+# 暂不开放
+# def config_writerefImageParams(config_dict):
+#     try:
+#         refImageParams_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "refImageParams.json"),'w',encoding='utf-8')
+#         json.dump(refImageParams,refImageParams_file,ensure_ascii=False)
+#         refImageParams_file.close()
+#     except Exception as e:
+#         print(e)
+#         refImageParams_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "refImageParams.json"),'w',encoding='utf-8')
+#         json.dump(refImageParams,refImageParams_file,ensure_ascii=False)
+#         refImageParams_file.close()
+#     return
 
 def solution_loadLists():
     try:
@@ -225,7 +257,7 @@ def solution_loadLists():
         bookmarkList = json.load(bookmarkList_file)
         bookmarkList_file.close()
     except Exception as e:
-        print(e)
+        global_logger.exception('solution_loadLists()错误')
         bookmarkList = []
         bookmarkList_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "bookmarkList.json"),'w',encoding='utf-8')
         json.dump(bookmarkList,bookmarkList_file,ensure_ascii=False)
@@ -235,7 +267,7 @@ def solution_loadLists():
         ruleOutList = json.load(ruleOutList_file)
         ruleOutList_file.close()
     except Exception as e:
-        print(e)
+        global_logger.exception('solution_loadLists()错误')
         ruleOutList = []
         ruleOutList_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "ruleOutList.json"),'w',encoding='utf-8')
         json.dump(ruleOutList,ruleOutList_file,ensure_ascii=False)

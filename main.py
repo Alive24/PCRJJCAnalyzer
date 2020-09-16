@@ -5,7 +5,6 @@ import json
 import util
 import copy
 import time
-import config
 import data
 import cv2
 import os
@@ -142,12 +141,12 @@ class generateCharCandidateRunnable(QRunnable):
                 {'name': '未知角色', 'id': 1000},
                 {'name': '未知角色', 'id': 1000},
         ]
-        charIndexCandidateList[0] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCOEFF"))))
-        charIndexCandidateList[1] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCOEFF_NORMED"))))
-        charIndexCandidateList[2] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCORR"))))
-        charIndexCandidateList[3] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCORR_NORMED"))))
-        charIndexCandidateList[4] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_SQDIFF"))))
-        charIndexCandidateList[5] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_SQDIFF_NORMED"))))
+        charIndexCandidateList[0] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCOEFF")), refImageParams))
+        charIndexCandidateList[1] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCOEFF_NORMED")), refImageParams))
+        charIndexCandidateList[2] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCORR")), refImageParams))
+        charIndexCandidateList[3] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_CCORR_NORMED")),refImageParams))
+        charIndexCandidateList[4] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_SQDIFF")), refImageParams))
+        charIndexCandidateList[5] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_SQDIFF_NORMED")), refImageParams))
         for j in range(6):
             charCandidateList[j]= data.refGrid[(charIndexCandidateList[j][1]-1)][(charIndexCandidateList[j][0]-1)]
         charDropboxItemList = []
@@ -381,7 +380,7 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
             if solution["atk"][i]['star'] == 6:
                 __scenePickStarList[i].addText("六星")
         for pick in solution["atk"]:
-            __pickImageList.append(util.query_getPickAvatar(pick['id']))
+            __pickImageList.append(util.query_getPickAvatar(pick['id'], refImageParams))
         __pixPickImageList = [QtGui.QPixmap.fromImage(pickImage) for pickImage in __pickImageList]
         __itemPickImageList = [QGraphicsPixmapItem(pix) for pix in __pixPickImageList]
         for i in range(len(__scenePickImageList)):
@@ -925,7 +924,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         refImage = cv2.imread(refImagePath) # 读取参考图
         for i in range(len(self.charImageList)):
             charNum = i+1
-            charIndex = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[i], refImage, eval("cv2.%s" % config_dict['algorithm'] )))) # 计算出目标角色在参考图中的坐标位置（行与列）
+            charIndex = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[i], refImage, eval("cv2.%s" % config_dict['algorithm'] )), refImageParams)) # 计算出目标角色在参考图中的坐标位置（行与列）
             self.charDataList[i] = data.refGrid[(charIndex[1]-1)][(charIndex[0]-1)]
             charName = self.charDataList[i]['name']
             print(charNum, charName, charIndex)
@@ -939,6 +938,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
 if __name__ == '__main__':
     # ### CLI测试部分
     config_dict = util.config_loadConfig()
+    refImageParams = util.config_getRefImageParams()
     app = QApplication(sys.argv)
     screen = app.primaryScreen()
     loop = quamash.QEventLoop(app)

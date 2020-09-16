@@ -1,17 +1,116 @@
 import cv2
 import json
+import copy
 import numpy as np
 import win32gui
 import os
+import base64
 import numpy as np
 from matplotlib import pyplot as plt
-import config
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import *
-import win32gui
 import sys
 import data
 hwnd_title = dict()
+quick_key_dic = {} 
+default_refImageParams = {
+    'refImagePath': '',
+    'totalWidth': 0,
+    'totalHeight': 0,
+    'columnCount': 0,
+    'rowCount': 0,
+    'unitWidth': 60,
+    'unitHeight': 60,
+    'gapWidth': 2
+}
+
+default_dict = {
+    'globalExclusionList': [],
+    'globalHideExclusionRuledOutSwitch': False,
+    'apiKey': '',
+    'region': 1,
+    'marginOffsetMode': '雷电模拟器',
+    'effectiveMarginOffSet': [0, 32, 42, 0],
+    'customizedApi': False,
+    'customizedApiUrl': '',
+    'algorithm': 'TM_SQDIFF',
+    'matchTemplateParams':
+        {
+            'charLocationRatioConfig_CurrentEnemyTeam': 
+                {
+                    'y': 0.138679389,
+                    'w': 0.058583784,
+                    'h': 0.08859542,
+                    'x': [0.610567568, 0.681837838, 0.752027027, 0.821459459, 0.891648649]
+                },
+            'charLocationRatioConfig_HistoryTeamOne': 
+                {
+                    'y': 0.265,
+                    'w': 0.058583784,
+                    'h': 0.09,
+                    'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]
+                },
+            'charLocationRatioConfig_HistoryTeamTwo': 
+                {
+                    'y': 0.4773333333,
+                    'w': 0.058583784,
+                    'h': 0.09,
+                    'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]
+                },
+            'charLocationRatioConfig_HistoryTeamThree':
+                {
+                    'y': 0.69,
+                    'w': 0.058583784,
+                    'h': 0.09,
+                    'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]
+                },
+            'charLocationRatioConfig_HistoryTeamOne_WithTitleBanner': 
+                {
+                    'y': 0.277778,
+                    'w': 0.058583784,
+                    'h': 0.09,
+                    'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]
+                },
+            'charLocationRatioConfig_HistoryTeamTwo_WithTitleBanner': 
+                {
+                    'y': 0.483333,
+                    'w': 0.058583784,
+                    'h': 0.09,
+                    'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]
+                },
+            'charLocationRatioConfig_HistoryTeamThree_WithTitleBanner':
+                {
+                    'y': 0.683333,
+                    'w': 0.058583784,
+                    'h': 0.09,
+                    'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]
+                },
+            'charLocationRatioConfig_OwnTeam': 
+                {
+                    'y': 0.76,
+                    'w': 0.0936,
+                    'h': 0.130,
+                    'x': [0.056, 0.16625, 0.28375, 0.394375, 0.506878]
+                }
+        }
+}
+
+def util_getRefImageParams():
+    refImageParams = copy.deepcopy(default_refImageParams)
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(".")
+    refImageParams['refImagePath'] = os.path.join(base_path, 'resource/refImage.png')
+    refImageQImage = QImage(refImageParams['refImagePath'])
+    refImageParams['totalWidth'] = refImageQImage.width()
+    refImageParams['totalHeight'] = refImageQImage.height()
+    refImageParams['columnCount'] = len(data.refGrid[0])
+    refImageParams['rowCount'] = len(data.refGrid)
+    return refImageParams
+
+
+
 
 def cv_getMidPoint(incomingImage, refImage, method):
 # 读取目标图像和参考图像，获取目标图像在参考图像中对应的部分的中点
@@ -53,12 +152,8 @@ def cv_getMidPoint(incomingImage, refImage, method):
 
 def cv_getIndex(midPoint):
 # 根据midPoint坐标计算其顺序坐标（行列）
-
-    totalWidth = config.refImg['Width']
-    totalHeight = config.refImg['Height']
-    singleWidth = totalWidth / config.refImg['ColumnCount']
-    singleHeight = totalHeight / config.refImg['RowCount']
-    index = [int(midPoint[0]/singleWidth)+1, int(midPoint[1]/singleHeight)+1]
+    refImageParams = util_getRefImageParams()
+    index = [int(midPoint[0]/refImageParams['unitWidth'])+1, int(midPoint[1]/refImageParams['unitHeight'])+1]
     return index
 
 
@@ -72,26 +167,26 @@ def query_gen_quick_key(true_id:str, user_id:int) -> str:
     return base64.b32encode(qkey.to_bytes(3, 'little')).decode()[:5]
 
 def query_getPickAvatar(id:int) -> QImage:
+    refImageParams = util_getRefImageParams()
     def getGridIndex(realId):
         index = [0, 0]
-        for i in range(config.refImg['RowCount']):
-            for j in range(config.refImg['ColumnCount']):
+        for i in range(refImageParams['rowCount']):
+            for j in range(refImageParams['columnCount']):
                 if data.refGrid[i][j]['id'] == realId:
                     index[0] = i + 1
                     index[1] = j + 1
                     return index
     realId = id // 100
     pickIndex = getGridIndex(realId)
-    pickX = (pickIndex[1] - 1) * (config.refImg['UnitWidth'] + config.refImg['GapWidth'])
-    pickY = (pickIndex[0] - 1) * (config.refImg['UnitWidth'] + config.refImg['GapWidth'])
-    pickW = config.refImg['UnitWidth']
-    pickH = config.refImg['UnitWidth']
+    pickX = (pickIndex[1] - 1) * (refImageParams['unitWidth'] + refImageParams['gapWidth'])
+    pickY = (pickIndex[0] - 1) * (refImageParams['unitWidth'] + refImageParams['gapWidth'])
+    pickW = refImageParams['unitWidth']
+    pickH = refImageParams['unitWidth']
     if getattr(sys, 'frozen', False):
         base_path = sys._MEIPASS
     else:
         base_path = os.path.abspath(".")
-    refImagePath = os.path.join(base_path, 'resource/refImage.png')
-    pickAvatar = QImage(refImagePath).copy(pickX, pickY, pickW, pickH)
+    pickAvatar = QImage(refImageParams['refImagePath']).copy(pickX, pickY, pickW, pickH)
     return pickAvatar
 
 def config_loadConfig():
@@ -100,31 +195,13 @@ def config_loadConfig():
     try:
         config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'r',encoding='utf-8')
         config_dict_toLoad = json.load(config_file)
-        config_dict = {
-            'globalExclusionList': [],
-            'globalHideExclusionRuledOutSwitch': False,
-            'apiKey': '',
-            'region': 1,
-            'marginOffsetMode': '雷电模拟器',
-            'effectiveMarginOffSet': [0, 32, 42, 0],
-            'customizedApi': False,
-            'customizedApiUrl': ''
-        }
+        config_dict = copy.deepcopy(default_dict)
         for key in list(config_dict_toLoad.keys()):
             config_dict[key] = config_dict_toLoad[key]
         config_file.close()
     except Exception as e:
         print(e)
-        config_dict = {
-            'globalExclusionList': [],
-            'globalHideExclusionRuledOutSwitch': False,
-            'apiKey': '',
-            'region': 1,
-            'marginOffsetMode': '雷电模拟器',
-            'effectiveMarginOffSet': [0, 32, 42, 0],
-            'customizedApi': False,
-            'customizedApiUrl': ''
-        }
+        config_dict = copy.deepcopy(default_dict)
         config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'w',encoding='utf-8')
         json.dump(config_dict,config_file,ensure_ascii=False)
         config_file.close()

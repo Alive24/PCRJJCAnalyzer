@@ -15,13 +15,16 @@ import requests
 import win32gui
 import asyncio
 import quamash
-from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QLabel, QWidget, QTextBrowser, QMessageBox, QButtonGroup, QCheckBox, QDialog, QMenu, QAction
+import logging
+from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QApplication, QMainWindow, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QLabel, QWidget, QTextBrowser, QMessageBox, QButtonGroup, QCheckBox, QDialog, QMenu, QAction
 from PyQt5 import QtGui, QtCore, QtNetwork
-from PyQt5.QtCore import QRunnable, QThreadPool, pyqtSlot, QThread, QMetaObject, Qt, Q_ARG
+from PyQt5.QtCore import QProcess, QRunnable, QThreadPool, pyqtSlot, QThread, QMetaObject, Qt, Q_ARG
 from gui import Ui_PCRJJCAnalyzerGUI
 from solutionWidget import Ui_solutionWidget
 from configDialog import Ui_configDialog
 from exceptHookHandler import ExceptHookHandler
+
+global_logger = logging.getLogger()
 
 class GUIConfigDialogWidget(QDialog, Ui_configDialog):
     def __init__(self, parent=None, mainGUI=None):
@@ -72,7 +75,7 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
         try:
             util.config_writeConfig(config_dict)
         except Exception as e:
-            print(e)
+            global_logger.exception("Failed to write config", e)
     def customizedApirUrlLineEditHandler(self,customizedApiUrl):
         config_dict['customizedApiUrl'] = customizedApiUrl
         util.config_writeConfig(config_dict)
@@ -220,10 +223,7 @@ class RequestRunnable(QRunnable):
             'Content-Type': 'application/json'
         }
         r = requests.post(self.mUrl, json=self.mJson, headers=headers) or None
-        QThread.msleep(300)
-        print(r)
-        self.w.lastResponseJson = r.json()
-        self.w.lastRequestJson = self.mJson
+        QThread.msleep(500)
         try:
             if self.w.activeTeamNum == 1:
                 self.w.queryResultStorageTeam1['rjson'] = r.json()
@@ -253,7 +253,9 @@ class RequestRunnable(QRunnable):
             self.w.queryStatusTag.setStyleSheet("color:green")
         except Exception as e:
             try:
-                print(e)
+                global_logger.exception("查询失败")
+                global_logger.exception("self.mJson: %s" % self.mJson)
+                global_logger.exception("r.json(): %s" % r.json())
                 self.w.queryStatusTag.setText('查询失败(%s)' % r.json()['code'])
                 self.w.queryStatusTag.setStyleSheet("color:red")
             except:
@@ -420,7 +422,9 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
             for comment in list(reversed(solution['comment'])):
                 self.findChild(QTextBrowser, 'commentBrowser_%s' % solution['id']).append("(%s) %s" % (comment['date'][:10], comment['msg'])) 
         except Exception as e:
-            print(e, solution)
+            global_logger.exception("renderSolution()渲染错误")
+            global_logger.exception("渲染用solution: %s" % solution)
+            global_logger.exception("Exception %s" % e)
         
 
 
@@ -431,7 +435,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
         self.appExceptionHandler = ExceptHookHandler(self, logFile=os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "log.txt"))
-        self.setWindowTitle('PCRJJCAnalyzer-v0.1.3-beta1')
+        self.setWindowTitle('PCRJJCAnalyzer-v0.1.4-beta1')
         self.exclusionList  = [[], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         self.excludingSolutionIDList = ['','','']
         self.exclusionCheckBoxButtonGroup = QButtonGroup()
@@ -458,7 +462,6 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.team2RadioButton.clicked.connect(lambda: self.switchActiveTeam(2))
         self.team3RadioButton.clicked.connect(lambda: self.switchActiveTeam(3))
         self.apiKeylineEdit.textChanged.connect(self.setApiKey)
-        self.algorithm = config.algorithm
         self.apiKey = config_dict['apiKey']
         self.apiKeylineEdit.setText(self.apiKey)
         self.activeTeamNum = 1
@@ -476,17 +479,17 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             self.setRegion3.setChecked(True)
         if config_dict['region'] == 4:
             self.setRegion3.setChecked(True)
-        if self.algorithm == "TM_CCOEFF":
+        if config_dict['algorithm'] == "TM_CCOEFF":
             self.TM_CCOEFF.setChecked(True)
-        if self.algorithm == "TM_CCOEFF_NORMED":
+        if config_dict['algorithm'] == "TM_CCOEFF_NORMED":
             self.TM_CCOEFF_NORMED.setChecked(True)
-        if self.algorithm == "TM_CCORR":
+        if config_dict['algorithm'] == "TM_CCORR":
             self.TM_CCORR.setChecked(True)
-        if self.algorithm == "TM_CCORR_NORMED":
+        if config_dict['algorithm'] == "TM_CCORR_NORMED":
             self.TM_CCORR_NORMED.setChecked(True)
-        if self.algorithm == "TM_SQDIFF":
+        if config_dict['algorithm'] == "TM_SQDIFF":
             self.TM_SQDIFF.setChecked(True)
-        if self.algorithm == "TM_SQDIFF_NORMED":
+        if config_dict['algorithm'] == "TM_SQDIFF_NORMED":
             self.TM_SQDIFF_NORMED.setChecked(True)
         self.updateHandleSelectorListButton.clicked.connect(self.initializeHandleSelector)
         self.handleSelectorComboBox.activated[str].connect(self.onHandleSelect)
@@ -651,7 +654,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             self.char4Dropbox.addItems(char4DropboxItemList)
             self.char5Dropbox.addItems(char5DropboxItemList)
         except Exception as e:
-            print(e)
+            global_logger.exception("switchActiveTeam()生成dropboxlist错误")
+            global_logger.exception("Exception %s" % e)
         try:
             self.char1Avatar.setScene(self.sceneCharImageList[0])
             self.char2Avatar.setScene(self.sceneCharImageList[1])
@@ -681,7 +685,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                 self.queryStatusTag.setText('等待查询')
                 self.queryStatusTag.setStyleSheet("color:green")
         except Exception as e:
-            print(e)
+            global_logger.exception("switchActiveTeam()渲染globalExclusion错误")
+            global_logger.exception("Exception %s" % e)
         
 
     def setApiKey(self, apiKey):
@@ -739,17 +744,23 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         clickedRadioButton = self.sender()
         if clickedRadioButton.isChecked():
             if clickedRadioButton.objectName() == "TM_CCOEFF":
-                self.algorithm = "cv2.TM_CCOEFF"
+                config_dict['algorithm'] = "cv2.TM_CCOEFF"
+                util.config_writeConfig(config_dict)
             if clickedRadioButton.objectName() == "TM_CCOEFF_NORMED":
-                self.algorithm = "cv2.TM_CCOEFF_NORMED"
+                config_dict['algorithm'] = "cv2.TM_CCOEFF_NORMED"
+                util.config_writeConfig(config_dict)
             if clickedRadioButton.objectName() == "TM_CCORR":
-                self.algorithm = "cv2.TM_CCORR"
+                config_dict['algorithm'] = "cv2.TM_CCORR"
+                util.config_writeConfig(config_dict)
             if clickedRadioButton.objectName() == "TM_CCORR_NORMED":
-                self.algorithm = "cv2.TM_CCORR_NORMED"
+                config_dict['algorithm'] = "cv2.TM_CCORR_NORMED"
+                util.config_writeConfig(config_dict)
             if clickedRadioButton.objectName() == "TM_SQDIFF":
-                self.algorithm = "cv2.TM_SQDIFF"
+                config_dict['algorithm'] = "cv2.TM_SQDIFF"
+                util.config_writeConfig(config_dict)
             if clickedRadioButton.objectName() == "TM_SQDIFF_NORMED":
-                self.algorithm = "cv2.TM_SQDIFF_NORMED"
+                config_dict['algorithm'] = "cv2.TM_SQDIFF_NORMED"
+                util.config_writeConfig(config_dict)
 
     def setRegionOnClicked(self):
         clickedRadioButton = self.sender()
@@ -765,7 +776,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         try:
             util.config_writeConfig(config_dict)
         except Exception as e:
-            print(e)
+            global_logger.exception("setRegionOnClicked()错误")
+            global_logger.exception("Exception %s" % e)
     def recognizeAndSolve(self, teamNum:[0, 1, 2, 3, 4]):
         self.exclusionCheckBoxButtonGroup = QButtonGroup()
         self.char1Dropbox.clear()
@@ -787,64 +799,70 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         #gameImage.save('gameImage.png', 'PNG')
         if teamNum==0:
             # 当前目标队，右上
-            translatedCharY = gameImage.height()*config.charLocationRatioConfig_CurrentEnemyTeam['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
-            translatedCharH = gameImage.height()*config.charLocationRatioConfig_CurrentEnemyTeam['h']
-            translatedCharW = gameImage.width()*config.charLocationRatioConfig_CurrentEnemyTeam['w']
+            translatedCharY = gameImage.height()*config_dict['matchTemplateParams']['charLocationRatioConfig_CurrentEnemyTeam']['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            translatedCharH = gameImage.height()*config_dict['matchTemplateParams']['charLocationRatioConfig_CurrentEnemyTeam']['h']
+            translatedCharW = gameImage.width()*config_dict['matchTemplateParams']['charLocationRatioConfig_CurrentEnemyTeam']['w']
             if self.activeTeamNum == 1:
-                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_CurrentEnemyTeam['x'] ]
+                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_CurrentEnemyTeam']['x'] ]
             if self.activeTeamNum == 2:
-                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_CurrentEnemyTeam['x'] ]
+                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_CurrentEnemyTeam']['x'] ]
             if self.activeTeamNum == 3:
-                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_CurrentEnemyTeam['x'] ]
-            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_CurrentEnemyTeam['x']] 
+                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_CurrentEnemyTeam']['x'] ]
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_CurrentEnemyTeam']['x']] 
         if teamNum==1:
             # 履历一队
-            translatedCharY = gameImage.height()*config.charLocationRatioConfig_HistoryTeamOne['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
-            translatedCharH = gameImage.height()*config.charLocationRatioConfig_HistoryTeamOne['h']
-            translatedCharW = gameImage.width()*config.charLocationRatioConfig_HistoryTeamOne['w']
+            translatedCharY = gameImage.height()*config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamOne']['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            if config_dict['region'] in [3,4]:
+                translatedCharY = gameImage.height()*config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamOne_WithTitleBanner']['y']
+            translatedCharH = gameImage.height()*config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamOne']['h']
+            translatedCharW = gameImage.width()*config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamOne']['w']
             if self.activeTeamNum == 1:
-                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamOne['x']]
+                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamOne']['x']]
             if self.activeTeamNum == 2:
-                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamOne['x']]
+                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamOne']['x']]
             if self.activeTeamNum == 3:
-                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamOne['x']]
-            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamOne['x']]
+                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamOne']['x']]
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamOne']['x']]
         if teamNum==2:
             #履历二队
-            translatedCharY = gameImage.height()*config.charLocationRatioConfig_HistoryTeamTwo['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
-            translatedCharH = gameImage.height()*config.charLocationRatioConfig_HistoryTeamTwo['h']
-            translatedCharW = gameImage.width()*config.charLocationRatioConfig_HistoryTeamTwo['w']
+            translatedCharY = gameImage.height()*config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamTwo']['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            if config_dict['region'] in [3,4]:
+                translatedCharY = gameImage.height()*config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamTwo_WithTitleBanner']['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            translatedCharH = gameImage.height()*config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamTwo']['h']
+            translatedCharW = gameImage.width()*config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamTwo']['w']
             if self.activeTeamNum == 1:
-                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamTwo['x']]
+                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamTwo']['x']]
             if self.activeTeamNum == 2:
-                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamTwo['x']]
+                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamTwo']['x']]
             if self.activeTeamNum == 3:
-                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamTwo['x']]
-            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamTwo['x']]
+                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamTwo']['x']]
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamTwo']['x']]
         if teamNum==3:
             #履历三队
-            translatedCharY = gameImage.height()*config.charLocationRatioConfig_HistoryTeamThree['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
-            translatedCharH = gameImage.height()*config.charLocationRatioConfig_HistoryTeamThree['h']
-            translatedCharW = gameImage.width()*config.charLocationRatioConfig_HistoryTeamThree['w']
+            translatedCharY = gameImage.height()*config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamThree']['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            if config_dict['region'] in [3,4]:
+                translatedCharY = gameImage.height()*config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamThree_WithTitleBanner']['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            translatedCharH = gameImage.height()*config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamThree']['h']
+            translatedCharW = gameImage.width()*config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamThree']['w']
             if self.activeTeamNum == 1:
-                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamThree['x']]
+                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamThree']['x']]
             if self.activeTeamNum == 2:
-                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamThree['x']]
+                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamThree']['x']]
             if self.activeTeamNum == 3:
-                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamThree['x']]
-            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_HistoryTeamThree['x']]
+                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamThree']['x']]
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_HistoryTeamThree']['x']]
         if teamNum==-1:
             # 当前防守队
-            translatedCharY = gameImage.height()*config.charLocationRatioConfig_OwnTeam['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
-            translatedCharH = gameImage.height()*config.charLocationRatioConfig_OwnTeam['h']
-            translatedCharW = gameImage.width()*config.charLocationRatioConfig_OwnTeam['w']
+            translatedCharY = gameImage.height()*config_dict['matchTemplateParams']['charLocationRatioConfig_OwnTeam']['y'] # 根据比例计算出对方阵容图标的y值、h值、w值
+            translatedCharH = gameImage.height()*config_dict['matchTemplateParams']['charLocationRatioConfig_OwnTeam']['h']
+            translatedCharW = gameImage.width()*config_dict['matchTemplateParams']['charLocationRatioConfig_OwnTeam']['w']
             if self.activeTeamNum == 1:
-                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_OwnTeam['x']]
+                self.queryResultStorageTeam1['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_OwnTeam']['x']]
             if self.activeTeamNum == 2:
-                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_OwnTeam['x']]
+                self.queryResultStorageTeam2['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_OwnTeam']['x']]
             if self.activeTeamNum == 3:
-                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_OwnTeam['x']]
-            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config.charLocationRatioConfig_OwnTeam['x']]
+                self.queryResultStorageTeam3['charImageList'] = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_OwnTeam']['x']]
+            self.charImageList = [gameImage.copy(gameImage.width() * x, translatedCharY, translatedCharW, translatedCharH).scaledToWidth(60) for x in config_dict['matchTemplateParams']['charLocationRatioConfig_OwnTeam']['x']]
         self.charDataList = [
             {'name': '未知角色', 'id': 1000},
             {'name': '未知角色', 'id': 1000},
@@ -907,7 +925,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         refImage = cv2.imread(refImagePath) # 读取参考图
         for i in range(len(self.charImageList)):
             charNum = i+1
-            charIndex = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[i], refImage, eval("cv2.%s" % self.algorithm )))) # 计算出目标角色在参考图中的坐标位置（行与列）
+            charIndex = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[i], refImage, eval("cv2.%s" % config_dict['algorithm'] )))) # 计算出目标角色在参考图中的坐标位置（行与列）
             self.charDataList[i] = data.refGrid[(charIndex[1]-1)][(charIndex[0]-1)]
             charName = self.charDataList[i]['name']
             print(charNum, charName, charIndex)
@@ -916,9 +934,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.char3Dropbox.addItem(self.charDataList[2]['name'])
         self.char4Dropbox.addItem(self.charDataList[3]['name'])
         self.char5Dropbox.addItem(self.charDataList[4]['name'])
-   
-        
-    
+
 
 if __name__ == '__main__':
     # ### CLI测试部分

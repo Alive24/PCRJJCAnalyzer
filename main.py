@@ -418,8 +418,9 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
             else:
                 __likeDislikeRatioValue_Text = "N/A"
             self.findChild(QLabel, 'likeDislikeRatioValue_%s' % solution['id']).setText(__likeDislikeRatioValue_Text)
-            for comment in list(reversed(solution['comment'])):
-                self.findChild(QTextBrowser, 'commentBrowser_%s' % solution['id']).append("(%s) %s" % (comment['date'][:10], comment['msg'])) 
+            if solution['comment']:
+                for comment in list(reversed(solution['comment'])):
+                    self.findChild(QTextBrowser, 'commentBrowser_%s' % solution['id']).append("(%s) %s" % (comment['date'][:10], comment['msg'])) 
         except Exception as e:
             global_logger.exception("renderSolution()渲染错误")
             global_logger.exception("渲染用solution: %s" % solution)
@@ -464,9 +465,39 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.apiKey = config_dict['apiKey']
         self.apiKeylineEdit.setText(self.apiKey)
         self.activeTeamNum = 1
-        self.queryResultStorageTeam1 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
-        self.queryResultStorageTeam2 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
-        self.queryResultStorageTeam3 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
+        self.queryResultStorageTeam1 = {
+            'def': [], 
+            'rjson': {}, 
+            'itemCharImageList':[], 
+            'charDataList': [], 
+            'char1CandidateList': [],
+            'char2CandidateList': [], 
+            'char3CandidateList': [], 
+            'char4CandidateList': [], 
+            'char5CandidateList': [], 
+        }
+        self.queryResultStorageTeam2 = {
+            'def': [], 
+            'rjson': {}, 
+            'itemCharImageList':[], 
+            'charDataList': [], 
+            'char1CandidateList': [],
+            'char2CandidateList': [], 
+            'char3CandidateList': [], 
+            'char4CandidateList': [], 
+            'char5CandidateList': [], 
+        }
+        self.queryResultStorageTeam3 = {
+            'def': [], 
+            'rjson': {}, 
+            'itemCharImageList':[], 
+            'charDataList': [], 
+            'char1CandidateList': [],
+            'char2CandidateList': [], 
+            'char3CandidateList': [], 
+            'char4CandidateList': [], 
+            'char5CandidateList': [], 
+        }
         self.team1RadioButton.setChecked(True)
         self.bookmarkList = util.solution_loadLists()[0]
         self.ruleOutList = util.solution_loadLists()[1]
@@ -548,10 +579,41 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
     def resetAll(self):
         self.activeTeamNum = 1
         self.team1RadioButton.setChecked(True)
-        self.queryResultStorageTeam1 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
-        self.queryResultStorageTeam2 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
-        self.queryResultStorageTeam3 = {'def': [], 'rjson': {}, 'itemCharImageList':[]}
+        self.queryResultStorageTeam1 = {
+            'def': [], 
+            'rjson': {}, 
+            'itemCharImageList':[], 
+            'charDataList': [], 
+            'char1CandidateList': [],
+            'char2CandidateList': [], 
+            'char3CandidateList': [], 
+            'char4CandidateList': [], 
+            'char5CandidateList': [], 
+        }
+        self.queryResultStorageTeam2 = {
+            'def': [], 
+            'rjson': {}, 
+            'itemCharImageList':[], 
+            'charDataList': [], 
+            'char1CandidateList': [],
+            'char2CandidateList': [], 
+            'char3CandidateList': [], 
+            'char4CandidateList': [], 
+            'char5CandidateList': [], 
+        }
+        self.queryResultStorageTeam3 = {
+            'def': [], 
+            'rjson': {}, 
+            'itemCharImageList':[], 
+            'charDataList': [], 
+            'char1CandidateList': [],
+            'char2CandidateList': [], 
+            'char3CandidateList': [], 
+            'char4CandidateList': [], 
+            'char5CandidateList': [], 
+        }
         self.exclusionList  = [[], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+        self.exclusionList[0] = config_dict['globalExclusionList']
         self.excludingSolutionIDList = ['','','']
         self.char1Dropbox.clear()
         self.char2Dropbox.clear()
@@ -605,12 +667,13 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                 self.char4CandidateList = self.queryResultStorageTeam1['char4CandidateList']
                 self.char5CandidateList = self.queryResultStorageTeam1['char5CandidateList']
                 targetQueryResultStorageRJson = self.queryResultStorageTeam1['rjson']
-                for j in range(6):
-                    char1DropboxItemList.append(self.queryResultStorageTeam1['char1CandidateList'][j]['name'])
-                    char2DropboxItemList.append(self.queryResultStorageTeam1['char2CandidateList'][j]['name'])
-                    char3DropboxItemList.append(self.queryResultStorageTeam1['char3CandidateList'][j]['name'])
-                    char4DropboxItemList.append(self.queryResultStorageTeam1['char4CandidateList'][j]['name'])
-                    char5DropboxItemList.append(self.queryResultStorageTeam1['char5CandidateList'][j]['name'])
+                if len(self.charDataList) != 0:
+                    for j in range(6):
+                        char1DropboxItemList.append(self.queryResultStorageTeam1['char1CandidateList'][j]['name'])
+                        char2DropboxItemList.append(self.queryResultStorageTeam1['char2CandidateList'][j]['name'])
+                        char3DropboxItemList.append(self.queryResultStorageTeam1['char3CandidateList'][j]['name'])
+                        char4DropboxItemList.append(self.queryResultStorageTeam1['char4CandidateList'][j]['name'])
+                        char5DropboxItemList.append(self.queryResultStorageTeam1['char5CandidateList'][j]['name'])
             if targetTeamNum == 2:
                 self.charDataList = self.queryResultStorageTeam2['charDataList']
                 self.itemCharImageList = self.queryResultStorageTeam2['itemCharImageList']
@@ -620,12 +683,13 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                 self.char4CandidateList = self.queryResultStorageTeam2['char4CandidateList']
                 self.char5CandidateList = self.queryResultStorageTeam2['char5CandidateList']
                 targetQueryResultStorageRJson = self.queryResultStorageTeam2['rjson']
-                for j in range(6):
-                    char1DropboxItemList.append(self.queryResultStorageTeam2['char1CandidateList'][j]['name'])
-                    char2DropboxItemList.append(self.queryResultStorageTeam2['char2CandidateList'][j]['name'])
-                    char3DropboxItemList.append(self.queryResultStorageTeam2['char3CandidateList'][j]['name'])
-                    char4DropboxItemList.append(self.queryResultStorageTeam2['char4CandidateList'][j]['name'])
-                    char5DropboxItemList.append(self.queryResultStorageTeam2['char5CandidateList'][j]['name'])
+                if len(self.charDataList) != 0:
+                    for j in range(6):
+                        char1DropboxItemList.append(self.queryResultStorageTeam2['char1CandidateList'][j]['name'])
+                        char2DropboxItemList.append(self.queryResultStorageTeam2['char2CandidateList'][j]['name'])
+                        char3DropboxItemList.append(self.queryResultStorageTeam2['char3CandidateList'][j]['name'])
+                        char4DropboxItemList.append(self.queryResultStorageTeam2['char4CandidateList'][j]['name'])
+                        char5DropboxItemList.append(self.queryResultStorageTeam2['char5CandidateList'][j]['name'])
             if targetTeamNum == 3:
                 self.charDataList = self.queryResultStorageTeam3['charDataList']
                 self.itemCharImageList = self.queryResultStorageTeam3['itemCharImageList']
@@ -635,23 +699,25 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                 self.char4CandidateList = self.queryResultStorageTeam3['char4CandidateList']
                 self.char5CandidateList = self.queryResultStorageTeam3['char5CandidateList']
                 targetQueryResultStorageRJson = self.queryResultStorageTeam3['rjson']
-                for j in range(6):
-                    char1DropboxItemList.append(self.queryResultStorageTeam3['char1CandidateList'][j]['name'])
-                    char2DropboxItemList.append(self.queryResultStorageTeam3['char2CandidateList'][j]['name'])
-                    char3DropboxItemList.append(self.queryResultStorageTeam3['char3CandidateList'][j]['name'])
-                    char4DropboxItemList.append(self.queryResultStorageTeam3['char4CandidateList'][j]['name'])
-                    char5DropboxItemList.append(self.queryResultStorageTeam3['char5CandidateList'][j]['name'])
-            self.showChars(targetTeamNum)
-            self.char1Dropbox.addItem(self.charDataList[0]['name'])
-            self.char2Dropbox.addItem(self.charDataList[1]['name'])
-            self.char3Dropbox.addItem(self.charDataList[2]['name'])
-            self.char4Dropbox.addItem(self.charDataList[3]['name'])
-            self.char5Dropbox.addItem(self.charDataList[4]['name'])
-            self.char1Dropbox.addItems(char1DropboxItemList)
-            self.char2Dropbox.addItems(char2DropboxItemList)
-            self.char3Dropbox.addItems(char3DropboxItemList)
-            self.char4Dropbox.addItems(char4DropboxItemList)
-            self.char5Dropbox.addItems(char5DropboxItemList)
+                if len(self.charDataList) != 0:
+                    for j in range(6):
+                        char1DropboxItemList.append(self.queryResultStorageTeam3['char1CandidateList'][j]['name'])
+                        char2DropboxItemList.append(self.queryResultStorageTeam3['char2CandidateList'][j]['name'])
+                        char3DropboxItemList.append(self.queryResultStorageTeam3['char3CandidateList'][j]['name'])
+                        char4DropboxItemList.append(self.queryResultStorageTeam3['char4CandidateList'][j]['name'])
+                        char5DropboxItemList.append(self.queryResultStorageTeam3['char5CandidateList'][j]['name'])
+            if len(self.charDataList) != 0:
+                self.showChars(targetTeamNum)
+                self.char1Dropbox.addItem(self.charDataList[0]['name'])
+                self.char2Dropbox.addItem(self.charDataList[1]['name'])
+                self.char3Dropbox.addItem(self.charDataList[2]['name'])
+                self.char4Dropbox.addItem(self.charDataList[3]['name'])
+                self.char5Dropbox.addItem(self.charDataList[4]['name'])
+                self.char1Dropbox.addItems(char1DropboxItemList)
+                self.char2Dropbox.addItems(char2DropboxItemList)
+                self.char3Dropbox.addItems(char3DropboxItemList)
+                self.char4Dropbox.addItems(char4DropboxItemList)
+                self.char5Dropbox.addItems(char5DropboxItemList)
         except Exception as e:
             global_logger.exception("switchActiveTeam()生成dropboxlist错误")
             global_logger.exception("Exception %s" % e)
@@ -675,7 +741,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                     if self.getIsInRuleOutList(solution):
                         continue                
                     __solutionPickIDSet = set([item['id'] for item in solution['atk']])
-                    __intersection = set(config_dict['globalExclusionList']) & __solutionPickIDSet
+                    __intersection = list(set(config_dict['globalExclusionList']) & __solutionPickIDSet)
                     if len(__intersection) != 0:
                         continue
                 QMetaObject.invokeMethod(self, "addSolution",
@@ -683,6 +749,9 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                                         Q_ARG(dict, solution))
                 self.queryStatusTag.setText('等待查询')
                 self.queryStatusTag.setStyleSheet("color:green")
+            if solution['comment']:
+                for comment in list(reversed(solution['comment'])):
+                    self.findChild(QTextBrowser, 'commentBrowser_%s' % solution['id']).append("(%s) %s" % (comment['date'][:10], comment['msg'])) 
         except Exception as e:
             global_logger.exception("switchActiveTeam()渲染globalExclusion错误")
             global_logger.exception("Exception %s" % e)

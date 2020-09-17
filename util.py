@@ -155,7 +155,7 @@ def cv_getMidPoint(incomingImage, refImage, method):
 
 def cv_getIndex(midPoint, refImageParams):
 # 根据midPoint坐标计算其顺序坐标（行列）
-    index = [int(midPoint[0]/refImageParams['unitWidth'])+1, int(midPoint[1]/refImageParams['unitHeight'])+1]
+    index = [int(midPoint[0]/(refImageParams['unitWidth'] + refImageParams['gapWidth']))+1, int(midPoint[1]/(refImageParams['unitHeight'] + refImageParams['gapWidth']))+1]
     return index
 
 

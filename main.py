@@ -1008,6 +1008,8 @@ if __name__ == '__main__':
     # ### CLI测试部分
     config_dict = util.config_loadConfig()
     refImageParams = util.config_getRefImageParams()
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
     app = QApplication(sys.argv)
     screen = app.primaryScreen()
     loop = quamash.QEventLoop(app)

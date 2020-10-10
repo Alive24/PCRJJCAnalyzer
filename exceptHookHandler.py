@@ -55,8 +55,9 @@ class ExceptHookHandler(object):
         sys.__excepthook__(excType, excValue, tb)     
         
         err_msg = ''.join(traceback.format_exception(excType, excValue, tb))
-        err_msg += '\n最后一次请求JSON: %s' % self.__mainGUI.lastRequestJson 
-        err_msg += '\n最后一次返回JSON: %s' % self.__mainGUI.lastResponseJson
+        err_msg += 'excType: %s' % excType 
+        err_msg += 'excValue: %s' % excValue
+        err_msg += 'tb: %s' % tb
         err_msg += '\nPCRJJCAnalyzer遇到了意料之外的错误。请在反馈时附上本对话框截图。'
         # Here collecting traceback and some log files to be sent for debugging.
         # But also possible to handle the error and continue working.

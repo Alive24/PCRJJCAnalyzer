@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 
+import numpy as np
 import json
 import util
 import copy
@@ -130,8 +131,9 @@ class generateCharCandidateRunnable(QRunnable):
             base_path = sys._MEIPASS
         else:
             base_path = os.path.abspath(".")
+        # 尝试修正可能出现的中文路径编码问题
         refImagePath = os.path.join(base_path, 'resource/refImage.png')
-        refImage = cv2.imread(refImagePath) # 读取参考图
+        refImage = cv2.imdecode(np.fromfile(refImagePath,dtype=np.uint8),cv2.IMREAD_COLOR) # 读取参考图
         charIndexCandidateList = [[],[],[],[],[],[]]
         charCandidateList = [
                 {'name': '未知角色', 'id': 1000},
@@ -425,17 +427,14 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
             global_logger.exception("renderSolution()渲染错误")
             global_logger.exception("渲染用solution: %s" % solution)
             global_logger.exception("Exception %s" % e)
-        
 
-
-        
 
 class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
     def __init__(self, parent=None):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
         self.appExceptionHandler = ExceptHookHandler(self, logFile=os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "log.txt"))
-        self.setWindowTitle('PCRJJCAnalyzer-v0.1.4-beta3')
+        self.setWindowTitle('PCRJJCAnalyzer-v0.1.4-beta4')
         self.exclusionList  = [[], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         self.excludingSolutionIDList = ['','','']
         self.exclusionCheckBoxButtonGroup = QButtonGroup()
@@ -989,8 +988,9 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             base_path = sys._MEIPASS
         else:
             base_path = os.path.abspath(".")
+        # 尝试修正可能出现的中文路径编码问题
         refImagePath = os.path.join(base_path, 'resource/refImage.png')
-        refImage = cv2.imread(refImagePath) # 读取参考图
+        refImage = cv2.imdecode(np.fromfile(refImagePath,dtype=np.uint8),cv2.IMREAD_COLOR) # 读取参考图
         for i in range(len(self.charImageList)):
             charNum = i+1
             charIndex = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[i], refImage, eval("cv2.%s" % config_dict['algorithm'] )), refImageParams)) # 计算出目标角色在参考图中的坐标位置（行与列）

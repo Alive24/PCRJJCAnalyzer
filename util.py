@@ -11,10 +11,15 @@ from matplotlib import pyplot as plt
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import *
 import sys
-import data
 
 global_logger = logging.getLogger()
 hwnd_title = dict()
+if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json")):
+    with open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'w',encoding='utf-8') as file:
+        file.write("[]")
+        file.close()
+characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'r',encoding='utf-8')
+characterIndexList = json.load(characterIndexListJsonFile)
 quick_key_dic = {} 
 default_refImageParams = {
     'refImagePath': '',
@@ -104,12 +109,10 @@ def config_getRefImageParams():
         base_path = sys._MEIPASS
     else:
         base_path = os.path.abspath(".")
-    refImageParams['refImagePath'] = os.path.join(base_path, 'resource/refImage.png')
+    refImageParams['refImagePath'] = os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "refImage.png")
     refImageQImage = QImage(refImageParams['refImagePath'])
     refImageParams['totalWidth'] = refImageQImage.width()
     refImageParams['totalHeight'] = refImageQImage.height()
-    refImageParams['columnCount'] = len(data.refGrid[0])
-    refImageParams['rowCount'] = len(data.refGrid)
     return refImageParams
 
 
@@ -155,7 +158,7 @@ def cv_getMidPoint(incomingImage, refImage, method):
 
 def cv_getIndex(midPoint, refImageParams):
 # 根据midPoint坐标计算其顺序坐标（行列）
-    index = [int(midPoint[0]/(refImageParams['unitWidth'] + refImageParams['gapWidth']))+1, int(midPoint[1]/(refImageParams['unitHeight'] + refImageParams['gapWidth']))+1]
+    index = [int(midPoint[0]/(62*3)), 1]
     return index
 
 
@@ -169,20 +172,17 @@ def query_gen_quick_key(true_id:str, user_id:int) -> str:
     return base64.b32encode(qkey.to_bytes(3, 'little')).decode()[:5]
 
 def query_getPickAvatar(id:int, refImageParams:dict) -> QImage:
-    def getGridIndex(realId):
-        index = [0, 0]
-        for i in range(refImageParams['rowCount']):
-            for j in range(refImageParams['columnCount']):
-                if data.refGrid[i][j]['id'] == realId:
-                    index[0] = i + 1
-                    index[1] = j + 1
-                    return index
-    realId = id // 100
-    pickIndex = getGridIndex(realId)
-    pickX = (pickIndex[1] - 1) * (refImageParams['unitWidth'] + refImageParams['gapWidth'])
-    pickY = (pickIndex[0] - 1) * (refImageParams['unitWidth'] + refImageParams['gapWidth'])
-    pickW = refImageParams['unitWidth']
-    pickH = refImageParams['unitWidth']
+    def getGridIndex(id):
+        index = [0, 1]
+        for i in range(len(characterIndexList)):
+            if characterIndexList[i]['unit_id'] == id:
+                index[0] = i
+                return index
+    pickIndex = getGridIndex(id)
+    pickX = (pickIndex[0]) * 62 * 3 + 62
+    pickY = 2
+    pickW = 60
+    pickH = 60
     if getattr(sys, 'frozen', False):
         base_path = sys._MEIPASS
     else:
@@ -193,6 +193,8 @@ def query_getPickAvatar(id:int, refImageParams:dict) -> QImage:
 def config_loadConfig():
     if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer")):
         os.makedirs(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer"))
+    if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData")):
+        os.makedirs(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData"))
     try:
         config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'r',encoding='utf-8')
         config_dict_toLoad = json.load(config_file)
@@ -309,8 +311,7 @@ def solution_removeFromRuleOutList(solution, mainGUI):
     return
 
 def refData_getNameByRawID(rawID):
-    for row in data.refGrid:
-        for entry in row:
-            if entry['id'] == rawID:
-                return entry['name']
+    for entry in characterIndexList:
+        if entry['unit_id'] == rawID:
+            return entry['unit_name']
     return

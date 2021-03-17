@@ -6,7 +6,6 @@ import json
 import util
 import copy
 import time
-import data
 import cv2
 import os
 import sys
@@ -16,6 +15,7 @@ import win32gui
 import asyncio
 import quamash
 import logging
+import OTA
 from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QApplication, QMainWindow, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QLabel, QWidget, QTextBrowser, QMessageBox, QButtonGroup, QCheckBox, QDialog, QMenu, QAction
 from PyQt5 import QtGui, QtCore, QtNetwork
 from PyQt5.QtCore import QProcess, QRunnable, QThreadPool, pyqtSlot, QThread, QMetaObject, Qt, Q_ARG
@@ -25,6 +25,10 @@ from configDialog import Ui_configDialog
 from exceptHookHandler import ExceptHookHandler
 
 global_logger = logging.getLogger()
+logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
+        level=logging.INFO)
+characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'r',encoding='utf-8')
+characterIndexList = json.load(characterIndexListJsonFile)
 
 class GUIConfigDialogWidget(QDialog, Ui_configDialog):
     def __init__(self, parent=None, mainGUI=None):
@@ -63,6 +67,24 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
         self.defaultApiUrlRadioButton.clicked.connect(self.setApiModeOnClicked)
         self.customizedApiUrlRadioButton.clicked.connect(self.setApiModeOnClicked)
         self.customizedApiUrlLineEdit.textChanged.connect(self.customizedApirUrlLineEditHandler)
+        self.updateFromCNSourceButton.clicked.connect(self.updateFromCNSourceOnClicked)
+        self.updateFromJPSourceButton.clicked.connect(self.updateFromJPSourceOnClicked)
+    def updateFromJPSourceOnClicked(self):
+        url = "https://redive.estertion.win/db/redive_jp.db.br"
+        OTA.updateCharacterIndexListByURL(url)
+        characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'r',encoding='utf-8')
+        characterIndexList = json.load(characterIndexListJsonFile)
+        OTA.updateAssetsByCharacterIndexList(characterIndexList)
+        OTA.generateRefImageByCharacterIndexList(characterIndexList)
+        self.updateStatusTag.setText("更新成功")
+    def updateFromCNSourceOnClicked(self):
+        url = "https://redive.estertion.win/db/redive_cn.db.br"
+        OTA.updateCharacterIndexListByURL(url)
+        characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'r',encoding='utf-8')
+        characterIndexList = json.load(characterIndexListJsonFile)
+        OTA.updateAssetsByCharacterIndexList(characterIndexList)
+        OTA.generateRefImageByCharacterIndexList(characterIndexList)
+        self.updateStatusTag.setText("更新成功")
     def setApiModeOnClicked(self):
         clickedRadioButton = self.sender()
         if clickedRadioButton.isChecked():
@@ -132,7 +154,7 @@ class generateCharCandidateRunnable(QRunnable):
         else:
             base_path = os.path.abspath(".")
         # 尝试修正可能出现的中文路径编码问题
-        refImagePath = os.path.join(base_path, 'resource/refImage.png')
+        refImagePath = refImageParams['refImagePath']
         refImage = cv2.imdecode(np.fromfile(refImagePath,dtype=np.uint8),cv2.IMREAD_COLOR) # 读取参考图
         charIndexCandidateList = [[],[],[],[],[],[]]
         charCandidateList = [
@@ -150,7 +172,10 @@ class generateCharCandidateRunnable(QRunnable):
         charIndexCandidateList[4] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_SQDIFF")), refImageParams))
         charIndexCandidateList[5] = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[self.i], refImage, eval("cv2.TM_SQDIFF_NORMED")), refImageParams))
         for j in range(6):
-            charCandidateList[j]= data.refGrid[(charIndexCandidateList[j][1]-1)][(charIndexCandidateList[j][0]-1)]
+            charName = characterIndexList[charIndexCandidateList[j][0]]["unit_name"]
+            charId = characterIndexList[charIndexCandidateList[j][0]]["unit_id"]
+            charCandidate = {"name": charName, "id": charId}
+            charCandidateList[j] = charCandidate
         charDropboxItemList = []
         for j in range(6):
             charDropboxItemList.append(charCandidateList[j]['name'])
@@ -846,6 +871,8 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             global_logger.exception("setRegionOnClicked()错误")
             global_logger.exception("Exception %s" % e)
     def recognizeAndSolve(self, teamNum:[0, 1, 2, 3, 4]):
+        characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'r',encoding='utf-8')
+        characterIndexList = json.load(characterIndexListJsonFile)
         self.exclusionCheckBoxButtonGroup = QButtonGroup()
         self.char1Dropbox.clear()
         self.char2Dropbox.clear()
@@ -940,8 +967,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         # self.sceneCharImageList = [QGraphicsScene().addItem(item) for item in self.itemCharImageList]
         self.showChars(0)
         self.parseChars()
-        raw_id_list = [charData['id'] for charData in self.charDataList]
-        id_list = [ x * 100 + 1 for x in raw_id_list ]
+        id_list = [charData['id'] for charData in self.charDataList]
         payload = {
             "_sign": "a", 
             "def": id_list, 
@@ -984,17 +1010,21 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.char4Avatar.setScene(self.sceneCharImageList[3])
         self.char5Avatar.setScene(self.sceneCharImageList[4])
     def parseChars(self):
+        characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'r',encoding='utf-8')
+        characterIndexList = json.load(characterIndexListJsonFile)
         if getattr(sys, 'frozen', False):
             base_path = sys._MEIPASS
         else:
             base_path = os.path.abspath(".")
         # 尝试修正可能出现的中文路径编码问题
-        refImagePath = os.path.join(base_path, 'resource/refImage.png')
+        refImagePath = refImageParams['refImagePath']
         refImage = cv2.imdecode(np.fromfile(refImagePath,dtype=np.uint8),cv2.IMREAD_COLOR) # 读取参考图
         for i in range(len(self.charImageList)):
             charNum = i+1
             charIndex = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[i], refImage, eval("cv2.%s" % config_dict['algorithm'] )), refImageParams)) # 计算出目标角色在参考图中的坐标位置（行与列）
-            self.charDataList[i] = data.refGrid[(charIndex[1]-1)][(charIndex[0]-1)]
+            charName = characterIndexList[charIndex[0]]["unit_name"]
+            charId = characterIndexList[(charIndex[0])]["unit_id"]
+            self.charDataList[i] = {"name": charName, "id": charId}
             charName = self.charDataList[i]['name']
             print(charNum, charName, charIndex)
         self.char1Dropbox.addItem(self.charDataList[0]['name'])

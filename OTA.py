@@ -36,7 +36,7 @@ def updateCharacterIndexListByURL(url):
             savedBinFile.write(data)
             savedBinFile.close()
             connection = sqlite3.connect("./Database.db")
-            unitDataCursor = connection.cursor().execute("select * from unit_data")
+            unitDataCursor = connection.cursor().execute("SELECT a.* FROM unit_skill_data b, unit_data a WHERE a.unit_id = b.unit_id AND a.unit_id < 400000")
             characterIndexList = []
             for row in unitDataCursor:
                 characterIndexList.append({"unit_id": row[0], "unit_name": row[1]})

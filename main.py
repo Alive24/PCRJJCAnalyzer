@@ -555,7 +555,6 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.setRegion2.clicked.connect(self.setRegionOnClicked)
         self.setRegion3.clicked.connect(self.setRegionOnClicked)
         self.setRegion4.clicked.connect(self.setRegionOnClicked)
-        print("current config_dict algorithm%s" % config_dict['algorithm'])
         if config_dict['algorithm'] == "cv2.TM_CCOEFF":
             self.TM_CCOEFF.setChecked(True)
         if config_dict['algorithm'] == "cv2.TM_CCOEFF_NORMED":

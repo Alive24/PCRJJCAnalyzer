@@ -2,4 +2,3 @@ dist
 build
 __pycache__
 tool/pics
-.vscode

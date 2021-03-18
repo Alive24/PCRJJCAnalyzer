@@ -14,6 +14,7 @@ import PIL.Image as Image
 global_logger = logging.getLogger()
 
 def updateCharacterIndexListByURL(url):
+    global_logger.warning("开始尝试更新CharacterIndexList。来源：%s" % url)
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36',
         'Referer': 'https://redive.estertion.win/api.htm',
@@ -30,7 +31,6 @@ def updateCharacterIndexListByURL(url):
             # response.encoding = 'utf-8'
             key = 'Content-Encoding'
             # print(response.headers[key])
-            print("-----------")
             data = brotli.decompress(response.content)
             savedBinFile = open("./Database.db", "wb")
             savedBinFile.write(data)
@@ -43,6 +43,7 @@ def updateCharacterIndexListByURL(url):
             characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'w',encoding='utf-8')
             json.dump(characterIndexList, characterIndexListJsonFile, ensure_ascii=False)
             characterIndexListJsonFile.close()
+        global_logger.warning("成功更新CharacterIndexList。来源：%s" % url)
         return None
     except Exception as e:
         print(e)
@@ -51,6 +52,7 @@ def updateCharacterIndexListByURL(url):
         return None
     
 def updateAssetsByCharacterIndexList(characterIndexList):
+    global_logger.warning("开始尝试更新角色图像。")
     for entry in characterIndexList:
         charId = str(entry["unit_id"])[:4]
         if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "%s11.webp" % charId)):
@@ -76,8 +78,10 @@ def updateAssetsByCharacterIndexList(characterIndexList):
                         global_logger.warning("成功下载角色头像（角色名：%s, 角色id：%s， 角色头像星级：6" % (entry["unit_name"], entry["unit_id"]))
             except Exception as e:
                 print(e)
+    global_logger.warning("更新角色图像完成。")
 
 def generateRefImageByCharacterIndexList(characterIndexList):
+    global_logger.warning("开始尝试拼接头像生成refImage。")
     refImagePath = os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "refImage.png")
     refImage = Image.new('RGBA', (len(characterIndexList) * (60+2) * 3, 62)) #创建一个新图
     for index in range(len(characterIndexList)):
@@ -93,9 +97,9 @@ def generateRefImageByCharacterIndexList(characterIndexList):
             coordinateImageSix = ((126+3*62*index, 2))
             refImage.paste(icon_imageSix, coordinateImageSix)
         except Exception as e:
-            global_logger.error("图片粘贴失败, Exception: %s" % e)
+            global_logger.debug("图片粘贴失败, 可能是没有成功下载到文件。Exception: %s" % e)
     refImage.save(refImagePath)
-    global_logger.info("成功更新refImage")
+    global_logger.warning("成功更新refImage")
 
 def devMain():
     logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',

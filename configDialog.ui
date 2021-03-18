@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>452</width>
+    <width>1341</width>
     <height>510</height>
    </rect>
   </property>
@@ -285,11 +285,47 @@
     <string>UpdateStatusTag</string>
    </property>
   </widget>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>40</y>
+     <width>871</width>
+     <height>461</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="logTextBoxLayout"/>
+  </widget>
+  <widget class="QLabel" name="loggingLevelLabel">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>10</y>
+     <width>54</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>日志级别</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="loggingLevelDropbox">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>10</y>
+     <width>81</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroup"/>
-  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

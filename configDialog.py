@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_configDialog(object):
     def setupUi(self, configDialog):
         configDialog.setObjectName("configDialog")
-        configDialog.resize(452, 510)
+        configDialog.resize(1341, 510)
         self.closeConfigDialogButton = QtWidgets.QPushButton(configDialog)
         self.closeConfigDialogButton.setGeometry(QtCore.QRect(360, 470, 81, 31))
         self.closeConfigDialogButton.setObjectName("closeConfigDialogButton")
@@ -88,6 +88,19 @@ class Ui_configDialog(object):
         self.updateStatusTag = QtWidgets.QLabel(configDialog)
         self.updateStatusTag.setGeometry(QtCore.QRect(180, 420, 261, 21))
         self.updateStatusTag.setObjectName("updateStatusTag")
+        self.verticalLayoutWidget = QtWidgets.QWidget(configDialog)
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(460, 40, 871, 461))
+        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+        self.logTextBoxLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
+        self.logTextBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.logTextBoxLayout.setObjectName("logTextBoxLayout")
+        self.loggingLevelLabel = QtWidgets.QLabel(configDialog)
+        self.loggingLevelLabel.setGeometry(QtCore.QRect(460, 10, 54, 20))
+        self.loggingLevelLabel.setObjectName("loggingLevelLabel")
+        self.loggingLevelDropbox = QtWidgets.QComboBox(configDialog)
+        self.loggingLevelDropbox.setEnabled(True)
+        self.loggingLevelDropbox.setGeometry(QtCore.QRect(520, 10, 81, 21))
+        self.loggingLevelDropbox.setObjectName("loggingLevelDropbox")
 
         self.retranslateUi(configDialog)
         QtCore.QMetaObject.connectSlotsByName(configDialog)
@@ -108,3 +121,4 @@ class Ui_configDialog(object):
         self.updateFromCNSourceButton.setText(_translate("configDialog", "从国服更新"))
         self.updateStatusLabel.setText(_translate("configDialog", "更新状态："))
         self.updateStatusTag.setText(_translate("configDialog", "UpdateStatusTag"))
+        self.loggingLevelLabel.setText(_translate("configDialog", "日志级别"))

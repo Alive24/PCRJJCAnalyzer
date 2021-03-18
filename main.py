@@ -1,13 +1,11 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
-
+import os
 import numpy as np
 import json
-import util
 import copy
 import time
 import cv2
-import os
 import sys
 import httpx
 import requests
@@ -15,25 +13,68 @@ import win32gui
 import asyncio
 import quamash
 import logging
-import OTA
-from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QApplication, QMainWindow, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QLabel, QWidget, QTextBrowser, QMessageBox, QButtonGroup, QCheckBox, QDialog, QMenu, QAction
+from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QApplication, QMainWindow, QGraphicsPixmapItem, QGraphicsScene, QGraphicsView, QLabel, QWidget, QTextBrowser, QMessageBox, QButtonGroup, QCheckBox, QDialog, QMenu, QAction, QPlainTextEdit
 from PyQt5 import QtGui, QtCore, QtNetwork
-from PyQt5.QtCore import QProcess, QRunnable, QThreadPool, pyqtSlot, QThread, QMetaObject, Qt, Q_ARG
+from PyQt5.QtCore import QProcess, QRunnable, QThreadPool, pyqtSlot, QThread, QMetaObject, Qt, Q_ARG, QObject, pyqtSignal
+
+## Version Info
+global globalVersion
+globalVersion = 'PCRJJCAnalyzer-v0.2.0-beta2'
+
+## PrepareInitialPaths
+if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer")):
+        os.makedirs(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer"))
+if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData")):
+    os.makedirs(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData"))
+if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json")):
+    with open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'w',encoding='utf-8') as file:
+        file.write("[]")
+        file.close()
+
+## PrepareGlobalVariables
+global characterIndexListJsonFile
+global characterIndexList
+characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'r',encoding='utf-8')
+characterIndexList = json.load(characterIndexListJsonFile)
+
+## Prepare Local Modules
+import util
+import OTA
 from gui import Ui_PCRJJCAnalyzerGUI
 from solutionWidget import Ui_solutionWidget
 from configDialog import Ui_configDialog
 from exceptHookHandler import ExceptHookHandler
 
+
+## Prepare Logging
 global_logger = logging.getLogger()
-logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
-        level=logging.INFO)
-characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'r',encoding='utf-8')
-characterIndexList = json.load(characterIndexListJsonFile)
+
+class LogHandler(QObject, logging.Handler):
+    new_record = pyqtSignal(object)
+    def __init__(self, parent):
+        super().__init__(parent)
+        super(logging.Handler).__init__()
+        formatter = LogFormatter('%(asctime)s|%(levelname)s|%(message)s', '%d/%m/%Y %H:%M:%S')
+        self.setFormatter(formatter)
+    def emit(self, record):
+        msg = self.format(record)
+        self.new_record.emit(msg) # <---- emit signal here
+class LogFormatter(logging.Formatter):
+    def formatException(self, ei):
+        result = super(LogFormatter, self).formatException(ei)
+        return result
+    def format(self, record):
+        s = super(LogFormatter, self).format(record)
+        if record.exc_text:
+            s = s.replace('\n', '')
+        return s
+
 
 class GUIConfigDialogWidget(QDialog, Ui_configDialog):
     def __init__(self, parent=None, mainGUI=None):
         super(GUIConfigDialogWidget, self).__init__(parent)
         self.setupUi(self)
+        self.setWindowTitle("设定")
         self.closeConfigDialogButton.clicked.connect(self.closeConfigDialog)
         self.marginOffsetPresetComboBoxList = ['自定义', '雷电模拟器', 'MuMu模拟器', 'DMM官方工具', ]
         self.marginOffsetPresetComboBox.addItems(self.marginOffsetPresetComboBoxList)
@@ -69,22 +110,43 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
         self.customizedApiUrlLineEdit.textChanged.connect(self.customizedApirUrlLineEditHandler)
         self.updateFromCNSourceButton.clicked.connect(self.updateFromCNSourceOnClicked)
         self.updateFromJPSourceButton.clicked.connect(self.updateFromJPSourceOnClicked)
+        self.updateStatusTag.setText(config_dict['lastDatabaseUpdate'])
+        logHandler = LogHandler(self)
+        logTextBox = QPlainTextEdit(self)
+        self.logTextBoxLayout.addWidget(logTextBox)
+        logging.getLogger().addHandler(logHandler)
+        logging.getLogger().setLevel(logging.WARNING)
+        logHandler.new_record.connect(logTextBox.appendPlainText)
+        loggingLevelList = ["Warning", "Info", "Debug"]
+        self.loggingLevelDropbox.addItems(loggingLevelList)
+        self.loggingLevelDropbox.activated[str].connect(lambda loggingLevel: self.onLoggingLevelDropboxSelect(loggingLevel))
+    def onLoggingLevelDropboxSelect(self, loggingLevel):
+        if loggingLevel == "Warning":
+            logging.getLogger().setLevel(logging.WARNING)
+        if loggingLevel == "Info":
+            logging.getLogger().setLevel(logging.INFO)
+        if loggingLevel == "Debug":
+            logging.getLogger().setLevel(logging.DEBUG)
+
+    def emitLog(self, record):
+        msg = self.format(record)
+        self.loggingPlainTextEdit.appendPlainText(msg)
     def updateFromJPSourceOnClicked(self):
         url = "https://redive.estertion.win/db/redive_jp.db.br"
-        OTA.updateCharacterIndexListByURL(url)
-        characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'r',encoding='utf-8')
-        characterIndexList = json.load(characterIndexListJsonFile)
-        OTA.updateAssetsByCharacterIndexList(characterIndexList)
-        OTA.generateRefImageByCharacterIndexList(characterIndexList)
-        self.updateStatusTag.setText("更新成功")
+        updateFromJPSourceRunnable = updateRunnable(url, self, "JP")
+        try:
+            QThreadPool.globalInstance().start(updateFromJPSourceRunnable)
+        except Exception as e:
+            self.updateStatusTag.setText("更新失败")
+            self.updateStatusTag.setStyleSheet("color:red")
     def updateFromCNSourceOnClicked(self):
         url = "https://redive.estertion.win/db/redive_cn.db.br"
-        OTA.updateCharacterIndexListByURL(url)
-        characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'r',encoding='utf-8')
-        characterIndexList = json.load(characterIndexListJsonFile)
-        OTA.updateAssetsByCharacterIndexList(characterIndexList)
-        OTA.generateRefImageByCharacterIndexList(characterIndexList)
-        self.updateStatusTag.setText("更新成功")
+        updateFromJPSourceRunnable = updateRunnable(url, self, "CN")
+        try:
+            QThreadPool.globalInstance().start(updateFromJPSourceRunnable)
+        except Exception as e:
+            self.updateStatusTag.setText("更新失败")
+            self.updateStatusTag.setStyleSheet("color:red")
     def setApiModeOnClicked(self):
         clickedRadioButton = self.sender()
         if clickedRadioButton.isChecked():
@@ -141,6 +203,22 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
     #         self.marginOffsetSpinBoxBottom.setValue(42)
     def closeConfigDialog(self):
         self.close()
+
+class updateRunnable(QRunnable):
+    def __init__(self, url, parentWidget, source):
+        QRunnable.__init__(self)
+        self.url = url
+        self.parentWidget = parentWidget
+        self.source = source
+    def run(self):
+        OTA.updateCharacterIndexListByURL(self.url)
+        characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'r',encoding='utf-8')
+        characterIndexList = json.load(characterIndexListJsonFile)
+        OTA.updateAssetsByCharacterIndexList(characterIndexList)
+        OTA.generateRefImageByCharacterIndexList(characterIndexList)
+        config_dict['lastDatabaseUpdate'] = "%s from %s" % (str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())), self.source)
+        util.config_writeConfig(config_dict)
+        self.parentWidget.updateStatusTag.setText(config_dict['lastDatabaseUpdate'])
 
 class generateCharCandidateRunnable(QRunnable):
     def __init__(self, charImageList, mainGUI, i, ):
@@ -278,14 +356,15 @@ class RequestRunnable(QRunnable):
             self.w.queryStatusTag.setText('等待查询')
             self.w.queryStatusTag.setStyleSheet("color:green")
         except Exception as e:
+            global_logger.exception("查询失败\n")
+            global_logger.exception("self.mJson: %s\n" % self.mJson)
             try:
-                global_logger.exception("查询失败")
-                global_logger.exception("self.mJson: %s" % self.mJson)
-                global_logger.exception("r.json(): %s" % r.json())
+                global_logger.exception("r.json(): %s\n" % r.json())
                 self.w.queryStatusTag.setText('查询失败(%s)' % r.json()['code'])
                 self.w.queryStatusTag.setStyleSheet("color:red")
             except:
-                self.w.queryStatusTag.setText('查询失败(%s)' % "N/A")
+                global_logger.exception("没有获取到返回结果，请检查接口URL。\n" )
+                self.w.queryStatusTag.setText('查询失败(%s)' % "N/A URL")
                 self.w.queryStatusTag.setStyleSheet("color:red")
             return
 
@@ -459,7 +538,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         super(GUIMainWin, self).__init__(parent)
         self.setupUi(self)
         self.appExceptionHandler = ExceptHookHandler(self, logFile=os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "log.txt"))
-        self.setWindowTitle('PCRJJCAnalyzer-v0.1.4-beta5')
+        self.setWindowTitle(globalVersion)
         self.exclusionList  = [[], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         self.excludingSolutionIDList = ['','','']
         self.exclusionCheckBoxButtonGroup = QButtonGroup()
@@ -476,6 +555,19 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.setRegion2.clicked.connect(self.setRegionOnClicked)
         self.setRegion3.clicked.connect(self.setRegionOnClicked)
         self.setRegion4.clicked.connect(self.setRegionOnClicked)
+        print("current config_dict algorithm%s" % config_dict['algorithm'])
+        if config_dict['algorithm'] == "cv2.TM_CCOEFF":
+            self.TM_CCOEFF.setChecked(True)
+        if config_dict['algorithm'] == "cv2.TM_CCOEFF_NORMED":
+            self.TM_CCOEFF_NORMED.setChecked(True)
+        if config_dict['algorithm'] == "cv2.TM_CCORR":
+            self.TM_CCORR.setChecked(True)
+        if config_dict['algorithm'] == "cv2.TM_CCORR_NORMED":
+            self.TM_CCORR_NORMED.setChecked(True)
+        if config_dict['algorithm'] == "cv2.TM_SQDIFF":
+            self.TM_SQDIFF.setChecked(True)
+        if config_dict['algorithm'] == "cv2.TM_SQDIFF_NORMED":
+            self.TM_SQDIFF_NORMED.setChecked(True)
         self.TM_CCOEFF.clicked.connect(self.setTMAlgorithmOnClicked)
         self.TM_CCOEFF_NORMED.clicked.connect(self.setTMAlgorithmOnClicked)
         self.TM_CCORR.clicked.connect(self.setTMAlgorithmOnClicked)
@@ -533,18 +625,6 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
             self.setRegion3.setChecked(True)
         if config_dict['region'] == 4:
             self.setRegion3.setChecked(True)
-        if config_dict['algorithm'] == "TM_CCOEFF":
-            self.TM_CCOEFF.setChecked(True)
-        if config_dict['algorithm'] == "TM_CCOEFF_NORMED":
-            self.TM_CCOEFF_NORMED.setChecked(True)
-        if config_dict['algorithm'] == "TM_CCORR":
-            self.TM_CCORR.setChecked(True)
-        if config_dict['algorithm'] == "TM_CCORR_NORMED":
-            self.TM_CCORR_NORMED.setChecked(True)
-        if config_dict['algorithm'] == "TM_SQDIFF":
-            self.TM_SQDIFF.setChecked(True)
-        if config_dict['algorithm'] == "TM_SQDIFF_NORMED":
-            self.TM_SQDIFF_NORMED.setChecked(True)
         self.updateHandleSelectorListButton.clicked.connect(self.initializeHandleSelector)
         self.handleSelectorComboBox.activated[str].connect(self.onHandleSelect)
         self.handle = 0
@@ -1032,7 +1112,6 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         self.char3Dropbox.addItem(self.charDataList[2]['name'])
         self.char4Dropbox.addItem(self.charDataList[3]['name'])
         self.char5Dropbox.addItem(self.charDataList[4]['name'])
-
 
 if __name__ == '__main__':
     # ### CLI测试部分

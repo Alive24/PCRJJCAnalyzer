@@ -14,10 +14,6 @@ import sys
 
 global_logger = logging.getLogger()
 hwnd_title = dict()
-if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json")):
-    with open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'w',encoding='utf-8') as file:
-        file.write("[]")
-        file.close()
 characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'r',encoding='utf-8')
 characterIndexList = json.load(characterIndexListJsonFile)
 quick_key_dic = {} 
@@ -33,6 +29,7 @@ default_refImageParams = {
 }
 
 default_dict = {
+    'lastDatabaseUpdate': "",
     'globalExclusionList': [],
     'globalHideExclusionRuledOutSwitch': False,
     'apiKey': '',
@@ -41,7 +38,7 @@ default_dict = {
     'effectiveMarginOffSet': [0, 32, 42, 0],
     'customizedApi': False,
     'customizedApiUrl': '',
-    'algorithm': 'TM_SQDIFF',
+    'algorithm': 'cv.TM_SQDIFF',
     'matchTemplateParams':
         {
             'charLocationRatioConfig_CurrentEnemyTeam': 
@@ -191,10 +188,6 @@ def query_getPickAvatar(id:int, refImageParams:dict) -> QImage:
     return pickAvatar
 
 def config_loadConfig():
-    if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer")):
-        os.makedirs(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer"))
-    if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData")):
-        os.makedirs(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData"))
     try:
         config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'r',encoding='utf-8')
         config_dict_toLoad = json.load(config_file)

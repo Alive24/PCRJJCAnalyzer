@@ -52,32 +52,56 @@ def updateCharacterIndexListByURL(url):
         return None
     
 def updateAssetsByCharacterIndexList(characterIndexList):
+    try: 
+        connection = sqlite3.connect("./Database.db")
+        unitDataCursor = connection.cursor().execute("SELECT * from unlock_rarity_6 where unlock_flag = 1")
+        SixCharIDList = []
+        for row in unitDataCursor:
+            SixCharIDList.append(str(row[0])[:4])
+    except:
+        global_logger.warning("没有获取到六星角色信息。")
+    def checkIfMissingSix(charId):
+        flag = False
+        if charId in SixCharIDList:
+            if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "%s61.webp" % charId)):
+                flag = True
+        return flag
+        
     global_logger.warning("开始尝试更新角色图像。")
     for entry in characterIndexList:
         charId = str(entry["unit_id"])[:4]
-        if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "%s11.webp" % charId)):
-            global_logger.warning("没有找到%s(id:%s)的头像文件，尝试获取" % (entry["unit_name"], entry["unit_id"]) )
+        __missingOne = not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "%s11.webp" % charId))
+        __missingThree = not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "%s31.webp" % charId))
+        __missingSix = checkIfMissingSix(charId)
+        if __missingOne or __missingThree or __missingSix:
+            global_logger.warning("发现%s(id:%s)的头像文件缺失，尝试重新获取" % (entry["unit_name"], entry["unit_id"]) )
             webpURLOne = "https://redive.estertion.win/icon/unit/%s11.webp" % charId
             webpURLThree = "https://redive.estertion.win/icon/unit/%s31.webp" % charId
             webpURLSix = "https://redive.estertion.win/icon/unit/%s61.webp" % charId
             try:
-                webpContentOne = requests.get(webpURLOne)
-                if webpContentOne.status_code == 200:
-                    with open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "%s11%s" % (charId, ".webp")), 'wb') as file:
-                        file.write(webpContentOne.content)
-                        global_logger.warning("成功下载角色头像（角色名：%s, 角色id：%s， 角色头像星级：1" % (entry["unit_name"], entry["unit_id"]))
-                webpContentThree = requests.get(webpURLThree)
-                if webpContentThree.status_code == 200:
-                    with open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "%s31%s" % (charId, ".webp")), 'wb') as file:
-                        file.write(webpContentThree.content)
-                        global_logger.warning("成功下载角色头像（角色名：%s, 角色id：%s， 角色头像星级：3" % (entry["unit_name"], entry["unit_id"]))
-                webpContentSix = requests.get(webpURLSix)
-                if webpContentSix.status_code == 200:
-                    with open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "%s61%s" % (charId, ".webp")), 'wb') as file:
-                        file.write(webpContentSix.content)
-                        global_logger.warning("成功下载角色头像（角色名：%s, 角色id：%s， 角色头像星级：6" % (entry["unit_name"], entry["unit_id"]))
+                if __missingOne:
+                    global_logger.warning("尝试获取%s(id:%s)的一星头像文件（url: %s)" % (entry["unit_name"], entry["unit_id"], webpURLOne))
+                    webpContentOne = requests.get(webpURLOne)
+                    if webpContentOne.status_code == 200:
+                        with open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "%s11%s" % (charId, ".webp")), 'wb') as file:
+                            file.write(webpContentOne.content)
+                            global_logger.warning("成功下载角色头像（角色名：%s, 角色id：%s，角色头像星级：1)" % (entry["unit_name"], entry["unit_id"]))
+                if __missingThree:
+                    global_logger.warning("尝试获取%s(id:%s)的三星头像文件（url: %s)" % (entry["unit_name"], entry["unit_id"], webpURLThree))
+                    webpContentThree = requests.get(webpURLThree)
+                    if webpContentThree.status_code == 200:
+                        with open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "%s31%s" % (charId, ".webp")), 'wb') as file:
+                            file.write(webpContentThree.content)
+                            global_logger.warning("成功下载角色头像（角色名：%s, 角色id：%s，角色头像星级：3)" % (entry["unit_name"], entry["unit_id"]))
+                if __missingSix:
+                    global_logger.warning("尝试获取%s(id:%s)的六星头像文件（url: %s)" % (entry["unit_name"], entry["unit_id"], webpURLSix))
+                    webpContentSix = requests.get(webpURLSix)
+                    if webpContentSix.status_code == 200:
+                        with open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "%s61%s" % (charId, ".webp")), 'wb') as file:
+                            file.write(webpContentSix.content)
+                            global_logger.warning("成功下载角色头像（角色名：%s, 角色id：%s, 角色头像星级：6)" % (entry["unit_name"], entry["unit_id"]))
             except Exception as e:
-                print(e)
+                global_logger.error("尝试获取%s（id:%s)头像文件失败(FlagOne:%s, FlagThree:%s, FlagSix:%s)" % (entry["unit_name"], entry["unit_id"],__missingOne, __missingThree, __missingSix ))
     global_logger.warning("更新角色图像完成。")
 
 def generateRefImageByCharacterIndexList(characterIndexList):
@@ -104,8 +128,8 @@ def generateRefImageByCharacterIndexList(characterIndexList):
 def devMain():
     logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
         level=logging.WARNING)
-    url = "https://redive.estertion.win/db/redive_cn.db.br"
-    updateCharacterIndexListByURL(url)
+    # url = "https://redive.estertion.win/db/redive_jp.db.br"
+    # updateCharacterIndexListByURL(url)
     characterIndexListJsonFile = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "CharData", "characterIndexList.json"),'r',encoding='utf-8')
     characterIndexList = json.load(characterIndexListJsonFile)
     updateAssetsByCharacterIndexList(characterIndexList)

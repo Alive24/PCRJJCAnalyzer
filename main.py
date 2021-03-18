@@ -428,8 +428,7 @@ class GUIsolutionWidget(QWidget, Ui_solutionWidget):
         # 创建QMenu
         __contextMenu = QMenu(self)
         __pickID = solution['atk'][pickIndex-1]['id']
-        __pickRawID = __pickID // 100
-        __pickName = util.refData_getNameByRawID(__pickRawID)
+        __pickName = util.refData_getNameByRawID(__pickID)
         __addToLockedListAction = QAction('添加%s到未解锁角色列表' % __pickName, __contextMenu, checkable=True)
         if __pickID in mainGUI.exclusionList[0]:
             __addToLockedListAction.setChecked(True)

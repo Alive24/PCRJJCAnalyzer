@@ -19,7 +19,7 @@ from PyQt5.QtCore import QProcess, QRunnable, QThreadPool, pyqtSlot, QThread, QM
 
 ## Version Info
 global globalVersion
-globalVersion = 'PCRJJCAnalyzer-v0.2.0-beta2'
+globalVersion = 'PCRJJCAnalyzer-v0.2.1-beta1'
 
 ## PrepareInitialPaths
 if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer")):

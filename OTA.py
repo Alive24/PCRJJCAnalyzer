@@ -52,10 +52,10 @@ def updateCharacterIndexListByURL(url):
         return None
     
 def updateAssetsByCharacterIndexList(characterIndexList):
+    SixCharIDList = []
     try: 
         connection = sqlite3.connect("./Database.db")
         unitDataCursor = connection.cursor().execute("SELECT * from unlock_rarity_6 where unlock_flag = 1")
-        SixCharIDList = []
         for row in unitDataCursor:
             SixCharIDList.append(str(row[0])[:4])
     except:

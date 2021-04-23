@@ -147,6 +147,7 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
                 self.customizedApiUrlLineEdit.setDisabled(False)
         try:
             util.config_writeConfig(config_dict)
+            util.loadConfig()
         except Exception as e:
             global_logger.exception("Failed to write config", e)
     def customizedApirUrlLineEditHandler(self,customizedApiUrl):

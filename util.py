@@ -38,7 +38,7 @@ default_dict = {
     'effectiveMarginOffSet': [0, 32, 42, 0],
     'customizedApi': False,
     'customizedApiUrl': '',
-    'algorithm': 'cv.TM_SQDIFF',
+    'algorithm': 'cv2.TM_SQDIFF',
     'matchTemplateParams':
         {
             'charLocationRatioConfig_CurrentEnemyTeam': 
@@ -57,7 +57,7 @@ default_dict = {
                 },
             'charLocationRatioConfig_HistoryTeamTwo': 
                 {
-                    'y': 0.4773333333,
+                    'y': 0.49,
                     'w': 0.058583784,
                     'h': 0.09,
                     'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]
@@ -71,14 +71,14 @@ default_dict = {
                 },
             'charLocationRatioConfig_HistoryTeamOne_WithTitleBanner': 
                 {
-                    'y': 0.29,
+                    'y': 0.50,
                     'w': 0.058583784,
                     'h': 0.09,
                     'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]
                 },
             'charLocationRatioConfig_HistoryTeamTwo_WithTitleBanner': 
                 {
-                    'y': 0.483333,
+                    'y': 0.49,
                     'w': 0.058583784,
                     'h': 0.09,
                     'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]
@@ -200,7 +200,6 @@ def config_loadConfig():
         config_dict = copy.deepcopy(default_dict)
         config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'w',encoding='utf-8')
         json.dump(config_dict,config_file,ensure_ascii=False)
-        config_file.close()
     return config_dict
 
 def config_loadRefImageParams():
@@ -231,6 +230,7 @@ def config_writeConfig(config_dict):
         config_file = open(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer", "config.json"),'w',encoding='utf-8')
         json.dump(config_dict,config_file,ensure_ascii=False)
         config_file.close()
+    config_loadConfig()
     return
 
 # 暂不开放

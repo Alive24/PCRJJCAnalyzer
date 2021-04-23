@@ -19,7 +19,7 @@ from PyQt5.QtCore import QProcess, QRunnable, QThreadPool, pyqtSlot, QThread, QM
 
 ## Version Info
 global globalVersion
-globalVersion = 'PCRJJCAnalyzer-v0.2.2-beta1'
+globalVersion = 'PCRJJCAnalyzer-v0.2.2-beta2'
 
 ## PrepareInitialPaths
 if not os.path.exists(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer")):
@@ -103,9 +103,12 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
     def onOpenConfigFolderButtonClicked(self):
         os.startfile(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer"))
     def onResetSettingsButton(self):
+        global config_dict
         util.config_writeConfig(util.default_dict)
-        util.loadConfig()
-        global_logger.info("已重置设定。")
+        config_dict = util.default_dict
+        self.customizedApiUrlLineEdit.setDisabled(True)
+        self.defaultApiUrlRadioButton.setChecked(True)
+        global_logger.warning("已重置设定。")
     def onLoggingLevelDropboxSelect(self, loggingLevel):
         if loggingLevel == "Warning":
             logging.getLogger().setLevel(logging.WARNING)
@@ -149,7 +152,7 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
                 self.customizedApiUrlLineEdit.setDisabled(False)
         try:
             util.config_writeConfig(config_dict)
-            util.loadConfig()
+            util.config_loadConfig()
         except Exception as e:
             global_logger.exception("Failed to write config", e)
     def customizedApirUrlLineEditHandler(self,customizedApiUrl):
@@ -1053,7 +1056,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         refImage = cv2.imdecode(np.fromfile(refImagePath,dtype=np.uint8),cv2.IMREAD_COLOR) # 读取参考图
         for i in range(len(self.charImageList)):
             charNum = i+1
-            charIndex = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[i], refImage, eval("cv2.%s" % config_dict['algorithm'] )), refImageParams)) # 计算出目标角色在参考图中的坐标位置（行与列）
+            charIndex = (util.cv_getIndex(util.cv_getMidPoint(self.charImageList[i], refImage, eval("%s" % config_dict['algorithm'] )), refImageParams)) # 计算出目标角色在参考图中的坐标位置（行与列）
             charName = characterIndexList[charIndex[0]]["unit_name"]
             charId = characterIndexList[(charIndex[0])]["unit_id"]
             self.charDataList[i] = {"name": charName, "id": charId}
@@ -1067,6 +1070,7 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
 
 if __name__ == '__main__':
     # ### CLI测试部分
+    global config_dict 
     config_dict = util.config_loadConfig()
     refImageParams = util.config_getRefImageParams()
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)

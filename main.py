@@ -104,6 +104,8 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
         os.startfile(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer"))
     def onResetSettingsButton(self):
         util.config_writeConfig(util.default_dict)
+        util.loadConfig()
+        global_logger.info("已重置设定。")
     def onLoggingLevelDropboxSelect(self, loggingLevel):
         if loggingLevel == "Warning":
             logging.getLogger().setLevel(logging.WARNING)

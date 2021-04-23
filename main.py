@@ -100,6 +100,9 @@ class GUIConfigDialogWidget(QDialog, Ui_configDialog):
         self.loggingLevelDropbox.activated[str].connect(lambda loggingLevel: self.onLoggingLevelDropboxSelect(loggingLevel))
         self.openConfigFolderButton.clicked.connect(self.onOpenConfigFolderButtonClicked)
         self.resetSettingsButton.clicked.connect(self.onResetSettingsButton)
+        self.QRafdian.setPixmap(QtGui.QPixmap(os.path.join(os.getcwd(), "afdian", "afdian-Alive24.png")))
+        self.QRalipay.setPixmap(QtGui.QPixmap(os.path.join(os.getcwd(), "afdian", "tips-alipay.png")))
+        self.QRwechat.setPixmap(QtGui.QPixmap(os.path.join(os.getcwd(), "afdian", "tips-wechat.png")))
     def onOpenConfigFolderButtonClicked(self):
         os.startfile(os.path.join(os.path.expanduser('~'), "PCRJJCAnalyzer"))
     def onResetSettingsButton(self):

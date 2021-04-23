@@ -50,7 +50,7 @@ default_dict = {
                 },
             'charLocationRatioConfig_HistoryTeamOne': 
                 {
-                    'y': 0.265,
+                    'y': 0.29,
                     'w': 0.058583784,
                     'h': 0.09,
                     'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]
@@ -71,7 +71,7 @@ default_dict = {
                 },
             'charLocationRatioConfig_HistoryTeamOne_WithTitleBanner': 
                 {
-                    'y': 0.277778,
+                    'y': 0.29,
                     'w': 0.058583784,
                     'h': 0.09,
                     'x': [0.486625, 0.5571875, 0.628375, 0.69825, 0.7686375]

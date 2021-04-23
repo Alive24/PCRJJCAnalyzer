@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1341</width>
-    <height>510</height>
+    <width>1153</width>
+    <height>531</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QPushButton" name="closeConfigDialogButton">
    <property name="geometry">
     <rect>
-     <x>360</x>
-     <y>470</y>
+     <x>590</x>
+     <y>480</y>
      <width>81</width>
      <height>31</height>
     </rect>
@@ -26,150 +26,11 @@
     <string>关闭</string>
    </property>
   </widget>
-  <widget class="QGraphicsView" name="marginOffsetPreviewBox">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>70</y>
-     <width>320</width>
-     <height>180</height>
-    </rect>
-   </property>
-   <property name="verticalScrollBarPolicy">
-    <enum>Qt::ScrollBarAlwaysOff</enum>
-   </property>
-   <property name="horizontalScrollBarPolicy">
-    <enum>Qt::ScrollBarAlwaysOff</enum>
-   </property>
-  </widget>
-  <widget class="QSpinBox" name="marginOffsetSpinBoxLeft">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>140</y>
-     <width>42</width>
-     <height>22</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QSpinBox" name="marginOffsetSpinBoxRight">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>400</x>
-     <y>140</y>
-     <width>42</width>
-     <height>22</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QSpinBox" name="marginOffsetSpinBoxTop">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>200</x>
-     <y>40</y>
-     <width>42</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QSpinBox" name="marginOffsetSpinBoxBottom">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>200</x>
-     <y>260</y>
-     <width>42</width>
-     <height>22</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="marginOffsetSetterLabel">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>91</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>模拟器偏移设定</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="marginOffsetPresetComboBox">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>110</x>
-     <y>10</y>
-     <width>151</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="marginOffsetHint">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>290</y>
-     <width>331</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>(注：应当设定至刚好只留下完整的游戏界面，且画面为16:9）</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="testScreenshotButton">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>370</x>
-     <y>40</y>
-     <width>75</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>截屏测试</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="marginOffsetSetterLabel_2">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>30</y>
-     <width>91</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>（已弃用）</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="apiUrlLabel">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>320</y>
+     <x>300</x>
+     <y>80</y>
      <width>54</width>
      <height>21</height>
     </rect>
@@ -181,8 +42,8 @@
   <widget class="QRadioButton" name="defaultApiUrlRadioButton">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>320</y>
+     <x>370</x>
+     <y>80</y>
      <width>261</width>
      <height>21</height>
     </rect>
@@ -197,8 +58,8 @@
   <widget class="QRadioButton" name="customizedApiUrlRadioButton">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>340</y>
+     <x>370</x>
+     <y>120</y>
      <width>101</width>
      <height>21</height>
     </rect>
@@ -213,9 +74,9 @@
   <widget class="QLineEdit" name="customizedApiUrlLineEdit">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>340</y>
-     <width>271</width>
+     <x>470</x>
+     <y>120</y>
+     <width>181</width>
      <height>21</height>
     </rect>
    </property>
@@ -223,10 +84,10 @@
   <widget class="QLabel" name="updateOptionLabel">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>380</y>
+     <x>300</x>
+     <y>10</y>
      <width>61</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -236,8 +97,8 @@
   <widget class="QPushButton" name="updateFromJPSourceButton">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>380</y>
+     <x>370</x>
+     <y>10</y>
      <width>81</width>
      <height>31</height>
     </rect>
@@ -249,8 +110,8 @@
   <widget class="QPushButton" name="updateFromCNSourceButton">
    <property name="geometry">
     <rect>
-     <x>180</x>
-     <y>380</y>
+     <x>460</x>
+     <y>10</y>
      <width>81</width>
      <height>31</height>
     </rect>
@@ -262,8 +123,8 @@
   <widget class="QLabel" name="updateStatusLabel">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>420</y>
+     <x>300</x>
+     <y>50</y>
      <width>71</width>
      <height>21</height>
     </rect>
@@ -275,8 +136,8 @@
   <widget class="QLabel" name="updateStatusTag">
    <property name="geometry">
     <rect>
-     <x>180</x>
-     <y>420</y>
+     <x>370</x>
+     <y>50</y>
      <width>261</width>
      <height>21</height>
     </rect>
@@ -288,10 +149,10 @@
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>460</x>
+     <x>680</x>
      <y>40</y>
-     <width>871</width>
-     <height>461</height>
+     <width>461</width>
+     <height>471</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="logTextBoxLayout"/>
@@ -299,7 +160,7 @@
   <widget class="QLabel" name="loggingLevelLabel">
    <property name="geometry">
     <rect>
-     <x>460</x>
+     <x>680</x>
      <y>10</y>
      <width>54</width>
      <height>20</height>
@@ -315,11 +176,190 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>520</x>
+     <x>740</x>
      <y>10</y>
      <width>81</width>
      <height>21</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="openConfigFolderButton">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>160</y>
+     <width>161</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>打开配置文件目录</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>271</width>
+     <height>351</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="pixmap">
+    <pixmap>afdian/afdian-Alive24.jpeg</pixmap>
+   </property>
+   <property name="scaledContents">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="HimariApiUrlRadioButton">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>100</y>
+     <width>261</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Himari Bot（@Switch 提供第三方API）</string>
+   </property>
+   <attribute name="buttonGroup">
+    <string notr="true">buttonGroup</string>
+   </attribute>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>370</y>
+     <width>150</width>
+     <height>150</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="pixmap">
+    <pixmap>afdian/tips.png</pixmap>
+   </property>
+   <property name="scaledContents">
+    <bool>true</bool>
+   </property>
+   <property name="wordWrap">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>370</y>
+     <width>131</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>扫码请作者一杯咖啡吧！</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>430</y>
+     <width>501</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;项目仓库地址：&lt;a href=&quot;https://github.com/Alive24/PCRJJCAnalyzer&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://github.com/Alive24/PCRJJCAnalyzer&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="openExternalLinks">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>460</y>
+     <width>501</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;GitHub主页：&lt;a href=&quot;https://github.com/Alive24&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://github.com/Alive24&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="openExternalLinks">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="resetSettingsButton">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>160</y>
+     <width>131</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>恢复默认设置</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>400</y>
+     <width>491</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;爱发电主页（按月资助创作者）：&lt;a href=&quot;http://afdian.net/@Alive24&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://afdian.net/@Alive24&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="openExternalLinks">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>490</y>
+     <width>421</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Bilibili主页：&lt;a href=&quot;https://space.bilibili.com/817008&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://space.bilibili.com/817008&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="openExternalLinks">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_8">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>200</y>
+     <width>361</width>
+     <height>161</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;使用开发交流QQ群：931482960 &lt;a href=&quot;https://qm.qq.com/cgi-bin/qm/qr?k=rRG5m6-sNKb88S0rTF7cppjyyyODP297&amp;amp;jump_from=webapi&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;（点这里快速加入）&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;特别鸣谢：&lt;/p&gt;&lt;p&gt;@ヒカリ @Switch @地河君_official&lt;/p&gt;&lt;p&gt;@Jjzy @Lily @枫&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+   </property>
+   <property name="openExternalLinks">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>

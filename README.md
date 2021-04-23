@@ -70,6 +70,7 @@
 3. 本工具本体完全免费。如果喜欢本工具并想请repo主喝杯咖啡请看这里
 
 ![Tips](https://github.com/Alive24/PCRJJCAnalyzer/blob/master/tips.png?raw=true)
+![爱发电主页（按月资助创作者）](http://afdian.net/@Alive24)
 
 ## 开发日志
 1. 2020-08-15 - 目前发现refImage均为三星后立绘，若有使用二星立绘的角色会识别失败，需要添加旧立绘头像数据。

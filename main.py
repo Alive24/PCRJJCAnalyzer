@@ -295,7 +295,7 @@ class RequestRunnable(QRunnable):
             "Authorization": "",
             "Host": "api.pcrdfans.com",
         }
-        r = requests.post(self.mUrl, data=RequestRunnable._dumps(self.mJson).encode('utf8'), headers=headers, proxies={"https": "localhost:1080"}) or None
+        r = requests.post(self.mUrl, data=RequestRunnable._dumps(self.mJson).encode('utf8'), headers=headers) or None
         QThread.msleep(500)
         try:
             if self.w.activeTeamNum == 1:

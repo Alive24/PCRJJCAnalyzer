@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 import os
+from pcrdapi import sign
 import numpy as np
 import json
 import copy
@@ -277,16 +278,24 @@ class RequestRunnable(QRunnable):
             if solution['id'] == ruledOutSolution['id']:
                 return True
         return False
+    
+    @staticmethod
+    def _dumps(x):
+        return json.dumps(x, ensure_ascii=False).replace(' ', '')
 
     def run(self):
         self.w.queryStatusTag.setText('查询中')
         self.w.queryStatusTag.setStyleSheet("color:black")
         headers = {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
-            'authorization': self.wApiKey,
-            'Content-Type': 'application/json'
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 Edg/87.0.664.66",
+            "Referer": "https://pcrdfans.com/",
+            "Origin": "https://pcrdfans.com",
+            "Accept": "*/*",
+            "Content-Type": "application/json; charset=utf-8",
+            "Authorization": "",
+            "Host": "api.pcrdfans.com",
         }
-        r = requests.post(self.mUrl, json=self.mJson, headers=headers) or None
+        r = requests.post(self.mUrl, data=RequestRunnable._dumps(self.mJson).encode('utf8'), headers=headers, proxies={"https": "localhost:1080"}) or None
         QThread.msleep(500)
         try:
             if self.w.activeTeamNum == 1:
@@ -845,16 +854,16 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
                 if self.char5CandidateList[i]['name'] == candidateName:
                     self.charDataList[4] = self.char5CandidateList[i]
         raw_id_list = [charData['id'] for charData in self.charDataList]
-        id_list = [ x * 100 + 1 for x in raw_id_list ]
+        id_list = list(set([ x for x in raw_id_list ]))
         payload = {
-            "_sign": "a", 
             "def": id_list, 
             "nonce": "a", 
             "page": 1, 
+            "region": config_dict['region'], 
             "sort": 1, 
-            "ts": int(time.time()), 
-            "region": config_dict['region']
+            "ts": int(time.time())
         }
+        sign(payload)
         apiUrl = "https://api.pcrdfans.com/x/v1/search"
         if config_dict['customizedApi'] == True:
             apiUrl = config_dict['customizedApiUrl']
@@ -1005,16 +1014,16 @@ class GUIMainWin(QMainWindow, Ui_PCRJJCAnalyzerGUI):
         # self.sceneCharImageList = [QGraphicsScene().addItem(item) for item in self.itemCharImageList]
         self.showChars(0)
         self.parseChars()
-        id_list = [charData['id'] for charData in self.charDataList]
+        id_list = list(set([charData['id'] for charData in self.charDataList]))
         payload = {
-            "_sign": "a", 
             "def": id_list, 
             "nonce": "a", 
             "page": 1, 
+            "region": config_dict['region'], 
             "sort": 1, 
-            "ts": int(time.time()), 
-            "region": config_dict['region']
+            "ts": int(time.time())
         }        
+        sign(payload)
         apiUrl = "https://api.pcrdfans.com/x/v1/search"
         if config_dict['customizedApi'] == True:
             apiUrl = config_dict['customizedApiUrl']
